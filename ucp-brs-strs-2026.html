@@ -1,0 +1,3134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>轮腿式无人作战平台 · BRS 业务需求规格说明 &amp; BtRS 相关方需求规格说明</title>
+<style>
+:root{
+  --bg:#060a10;
+  --surface:#0b131c;
+  --surface-2:#0e1822;
+  --line:rgba(140,180,210,.13);
+  --line-strong:rgba(140,180,210,.30);
+  --txt:#dbe6f0;
+  --dim:#8b9cae;
+  --faint:#56677b;
+  --cyan:#22d3ee;
+  --mint:#4ade80;
+  --amber:#fbbf24;
+  --orange:#fb923c;
+  --violet:#a78bfa;
+  --blue:#60a5fa;
+  --red:#f87171;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
+  --sans:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Noto Sans CJK SC",system-ui,sans-serif;
+  --side:278px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:78px}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--sans);
+  font-size:15.5px;line-height:1.85;-webkit-font-smoothing:antialiased;
+}
+.bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(120,170,200,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,170,200,.04) 1px,transparent 1px);
+  background-size:58px 58px;
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 25%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 25%,transparent 80%);
+}
+.bg-glow{
+  position:fixed;top:-320px;left:44%;transform:translateX(-50%);
+  width:1000px;height:640px;z-index:0;pointer-events:none;
+  background:radial-gradient(circle,rgba(34,211,238,.10) 0%,rgba(34,211,238,.03) 42%,transparent 72%);
+  filter:blur(18px);
+}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  position:sticky;top:0;z-index:60;
+  display:flex;align-items:center;gap:18px;
+  padding:11px clamp(16px,3vw,34px);
+  background:rgba(6,10,16,.86);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand-mark{width:9px;height:9px;flex:0 0 auto;background:var(--cyan);border-radius:2px;box-shadow:0 0 12px rgba(34,211,238,.85);animation:pulse 2.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.brand-text{font-family:var(--mono);font-size:11px;letter-spacing:.13em;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-text b{color:var(--txt);font-weight:600;letter-spacing:.04em}
+.volswitch{display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.02);flex:0 0 auto}
+.volswitch button{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  padding:5px 11px;border:0;border-radius:6px;cursor:pointer;
+  background:transparent;color:var(--dim);transition:.18s;white-space:nowrap;
+}
+.volswitch button:hover{color:var(--txt)}
+.volswitch button.on{background:rgba(34,211,238,.14);color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(34,211,238,.3)}
+.iconbtn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);
+  padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:transparent;
+  cursor:pointer;transition:.18s;flex:0 0 auto;
+}
+.iconbtn:hover{color:var(--cyan);border-color:rgba(34,211,238,.4)}
+
+/* ============ 布局 ============ */
+.layout{display:grid;grid-template-columns:var(--side) minmax(0,1fr);gap:0;position:relative;z-index:1}
+#toc{
+  position:sticky;top:57px;align-self:start;height:calc(100vh - 57px);overflow-y:auto;
+  padding:22px 16px 60px 22px;border-right:1px solid var(--line);
+  font-size:12.5px;scrollbar-width:thin;
+}
+#toc::-webkit-scrollbar{width:6px}
+#toc::-webkit-scrollbar-thumb{background:rgba(140,180,210,.18);border-radius:3px}
+.toc-sec{margin-bottom:14px}
+.toc-h{
+  width:100%;display:flex;align-items:center;gap:6px;cursor:pointer;
+  font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.03em;color:#d3e2ef;
+  padding:6px 6px 7px 9px;margin:0 0 3px;text-align:left;line-height:1.5;
+  background:none;border:0;border-left:2px solid transparent;transition:.16s;
+}
+.toc-h:hover{color:#ffffff;background:rgba(255,255,255,.04)}
+.toc-h.b{border-left-color:var(--amber)}
+.toc-h.s{border-left-color:var(--violet)}
+.toc-h .arw{margin-left:auto;font-size:17px;line-height:1;transition:transform .18s;opacity:.95}
+.toc-h .arw::before{content:"▾"}
+.toc-sec.collapsed .toc-h .arw{transform:rotate(-90deg)}
+.toc-sec.collapsed > .toc-list{display:none}
+.toc-list{}
+.toc-chap{display:flex;align-items:center;gap:1px}
+.toc-chap > a{flex:1;min-width:0}
+.toc-chap .arw{
+  flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  border:0;border-radius:6px;background:none;color:var(--dim);cursor:pointer;
+  font-size:18px;line-height:1;transition:transform .18s,color .16s,background .16s;
+}
+.toc-chap .arw::before{content:"▾"}
+.toc-chap .arw:hover{color:var(--cyan);background:rgba(34,211,238,.1)}
+.toc-chap .arw.closed{transform:rotate(-90deg)}
+.toc-sub{}
+.toc-sub.closed{display:none}
+#toc a{
+  display:block;color:#c6d7e6;text-decoration:none;padding:4px 8px 4px 10px;
+  border-left:1px solid transparent;border-radius:0 5px 5px 0;
+  font-size:13.5px;font-weight:600;line-height:1.5;
+  transition:.14s;
+}
+#toc a.lv3{padding-left:22px;font-size:12.5px;font-weight:400;color:var(--faint)}
+#toc a:hover{color:#eef6fd;background:rgba(255,255,255,.04)}
+#toc a.on{color:var(--cyan);border-left-color:var(--cyan);background:rgba(34,211,238,.08)}
+#toc a.on.lv3{color:var(--cyan);font-weight:500;opacity:.95}
+
+main{min-width:0;padding:0 clamp(20px,3.4vw,56px) 90px;max-width:1180px}
+
+/* ============ 封面 ============ */
+.cover{padding:clamp(38px,6vw,76px) 0 30px;border-bottom:1px solid var(--line);margin-bottom:44px}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--cyan);display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.kicker::before{content:"";width:34px;height:1px;background:var(--cyan);opacity:.75}
+.cover h1{font-size:clamp(30px,4.6vw,52px);line-height:1.14;font-weight:800;letter-spacing:-.01em;margin-bottom:14px}
+.cover h1 em{
+  font-style:normal;color:transparent;
+  background:linear-gradient(100deg,var(--cyan),#7dd3fc 45%,var(--mint));
+  -webkit-background-clip:text;background-clip:text;
+}
+.cover .sub{font-size:15px;color:var(--dim);max-width:820px;line-height:1.9}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.meta .m{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);
+  border:1px solid var(--line);border-radius:6px;padding:5px 10px;background:rgba(255,255,255,.02);
+}
+.meta .m b{color:var(--txt);font-weight:600}
+
+/* ============ 章节 ============ */
+.chap{margin:0 0 64px;scroll-margin-top:76px}
+.chap-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.chap-no{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--cyan);
+  border:1px solid rgba(34,211,238,.34);border-radius:5px;padding:3px 8px;margin-top:5px;flex:0 0 auto;
+  background:rgba(34,211,238,.07);
+}
+.chap-no.b{color:var(--amber);border-color:rgba(251,191,36,.34);background:rgba(251,191,36,.07)}
+.chap-no.s{color:var(--violet);border-color:rgba(167,139,250,.34);background:rgba(167,139,250,.07)}
+.chap-head h2{font-size:clamp(20px,2.5vw,27px);font-weight:750;letter-spacing:-.01em;line-height:1.35}
+.chap-sub{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--faint);margin-top:4px;display:block}
+h3{font-size:17.5px;font-weight:700;margin:30px 0 12px;line-height:1.5;color:#eaf3fb}
+h3 .n{font-family:var(--mono);font-size:12px;color:var(--dim);margin-right:9px;font-weight:500}
+h4{font-size:15px;font-weight:650;margin:20px 0 8px;color:#d7e5f2}
+h4 .n{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-right:7px}
+p{margin:0 0 12px;color:#c2d2e0}
+p.lead{font-size:16px;color:#cddbe8;line-height:1.95}
+ul,ol{margin:0 0 14px 0;padding-left:22px;color:#c2d2e0}
+li{margin-bottom:6px}
+li b, p b{color:#eaf3fb;font-weight:650}
+strong{color:#eaf3fb;font-weight:650}
+a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(34,211,238,.4)}
+a:hover{background:rgba(34,211,238,.08)}
+code,.mono{font-family:var(--mono);font-size:.92em;color:#9fe8f5;background:rgba(34,211,238,.08);padding:1px 5px;border-radius:4px}
+.hr{height:1px;background:var(--line);margin:26px 0}
+
+/* 提示块 */
+.note{
+  border-left:2px solid var(--cyan);background:rgba(34,211,238,.045);
+  padding:13px 16px;border-radius:0 8px 8px 0;font-size:13.5px;color:#b9c9d8;margin:16px 0 20px;line-height:1.85;
+}
+.note b{color:#eaf3fb}
+.note.warn{border-left-color:var(--amber);background:rgba(251,191,36,.05)}
+.note.rule{border-left-color:var(--red);background:rgba(248,113,113,.05)}
+.note.good{border-left-color:var(--mint);background:rgba(74,222,128,.05)}
+.note .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;display:block;margin-bottom:5px;color:var(--cyan)}
+.note.warn .k{color:var(--amber)}
+.note.rule .k{color:var(--red)}
+.note.good .k{color:var(--mint)}
+
+/* 卡片网格 */
+.grid{display:grid;gap:11px;margin:16px 0 22px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(168px,1fr))}
+.card{
+  border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--surface);
+  transition:.2s;
+}
+.card:hover{border-color:var(--line-strong);background:var(--surface-2)}
+.card .ct{font-size:14px;font-weight:650;color:#eaf3fb;margin-bottom:6px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.card .ct .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--cyan);border:1px solid rgba(34,211,238,.3);border-radius:4px;padding:0 5px;flex:0 0 auto}
+.card .cd{font-size:13px;color:var(--dim);line-height:1.75}
+.card.hl{border-color:rgba(34,211,238,.32);background:linear-gradient(180deg,rgba(34,211,238,.07),rgba(34,211,238,.01))}
+
+/* 统计条 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:18px 0 24px}
+.stat{border:1px solid var(--line);border-radius:9px;padding:13px 14px;background:var(--surface)}
+.stat .v{font-family:var(--mono);font-size:21px;font-weight:700;color:var(--cyan);line-height:1.15}
+.stat .v small{font-size:.55em;color:var(--dim);margin-left:2px}
+.stat .l{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+
+/* 表格 */
+.tbl-wrap{border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden;margin:16px 0 24px}
+.tbl-scroll{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+table.tbl th{
+  text-align:left;font-weight:650;color:#cfe0ee;font-size:11.5px;letter-spacing:.05em;
+  padding:10px 12px;border-bottom:1px solid var(--line-strong);background:rgba(255,255,255,.028);
+  position:sticky;top:0;white-space:nowrap;
+}
+table.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:#bacbda;line-height:1.7}
+table.tbl tbody tr:last-child td{border-bottom:0}
+table.tbl tbody tr:hover td{background:rgba(34,211,238,.045)}
+table.tbl td.id{font-family:var(--mono);font-size:11.5px;color:var(--cyan);white-space:nowrap}
+table.tbl td.name{color:#eaf3fb;font-weight:600}
+table.tbl td.c{text-align:center}
+.tbl-cap{font-size:11.5px;color:var(--faint);padding:8px 13px;border-top:1px solid var(--line);font-family:var(--mono);letter-spacing:.04em}
+
+/* 徽章 */
+.chip{
+  display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+  padding:1px 7px;border-radius:11px;border:1px solid;white-space:nowrap;
+}
+.c-direct{color:var(--mint);border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.08)}
+.c-inter{color:var(--cyan);border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.08)}
+.c-cons{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.c-aff{color:var(--violet);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.08)}
+.c-red{color:var(--red);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+.c-blue{color:var(--blue);border-color:rgba(96,165,250,.4);background:rgba(96,165,250,.08)}
+.chip-plain{color:var(--dim);border-color:var(--line-strong);background:rgba(255,255,255,.03)}
+
+/* 图表 */
+.fig{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:clamp(12px,2vw,20px);margin:18px 0 24px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:660px}
+.fig-cap{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);line-height:1.75}
+.fig-cap b{color:#eaf3fb;font-weight:600}
+
+/* 过滤条 */
+.filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 14px}
+.filterbar .fbtn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--dim);
+  border:1px solid var(--line);border-radius:16px;padding:4px 11px;background:transparent;cursor:pointer;transition:.16s;
+}
+.filterbar .fbtn:hover{color:var(--txt);border-color:var(--line-strong)}
+.filterbar .fbtn.on{color:var(--cyan);border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.1)}
+.filterbar input[type=search]{
+  font-family:var(--sans);font-size:12.5px;color:var(--txt);background:rgba(255,255,255,.03);
+  border:1px solid var(--line);border-radius:7px;padding:6px 11px;min-width:190px;outline:none;
+}
+.filterbar input[type=search]:focus{border-color:rgba(34,211,238,.45)}
+.filterbar .cnt{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:auto}
+
+/* 分卷显隐 */
+body.vol-brs section[data-vol="strs"]{display:none}
+body.vol-strs section[data-vol="brs"]{display:none}
+
+/* 折叠需求条目 */
+details.trd{
+  border:1px solid var(--line);border-radius:9px;background:var(--surface);
+  margin:0 0 9px;overflow:hidden;transition:.2s;
+}
+details.trd:hover{border-color:var(--line-strong)}
+details.trd summary{
+  cursor:pointer;padding:12px 15px;list-style:none;
+  display:flex;gap:11px;align-items:baseline;flex-wrap:wrap;
+  font-size:13.5px;color:#dce8f3;transition:.16s;
+}
+details.trd summary::-webkit-details-marker{display:none}
+details.trd summary:hover{background:rgba(34,211,238,.05)}
+details.trd summary .tid{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--cyan);flex:0 0 auto;
+}
+details.trd summary b{font-weight:650;color:#eaf3fb}
+details.trd summary .tpri{
+  margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint);
+  letter-spacing:.04em;flex:0 0 auto;
+}
+details.trd[open]{border-color:rgba(34,211,238,.32);background:var(--surface-2)}
+details.trd[open] summary{border-bottom:1px solid var(--line)}
+details.trd[open] summary .tpri{color:var(--cyan)}
+details.trd .trd-body{padding:13px 16px 8px;font-size:13.5px;color:#b9c9d8;line-height:1.85}
+details.trd .trd-body p{margin:0 0 8px;font-size:13.5px}
+details.trd .trd-body b{color:#eaf3fb}
+
+/* 折行小工具 */
+.nowrap{white-space:nowrap}
+.dim{color:var(--dim)}
+.small{font-size:12.5px}
+.mt0{margin-top:0}
+
+footer{
+  border-top:1px solid var(--line);margin-top:40px;padding:26px 0 0;
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  color:var(--faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.05em;
+}
+
+/* 返回顶部 */
+#toTop{
+  position:fixed;right:20px;bottom:22px;z-index:70;
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--line-strong);
+  background:rgba(11,19,28,.92);color:var(--dim);cursor:pointer;font-size:15px;
+  opacity:0;pointer-events:none;transition:.25s;
+}
+#toTop.show{opacity:1;pointer-events:auto}
+#toTop:hover{color:var(--cyan);border-color:rgba(34,211,238,.5)}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  #toc{display:none}
+  main{padding:0 18px 70px}
+  :root{--side:0px}
+}
+@media print{
+  body{background:#fff;color:#111;font-size:11pt}
+  .bg-grid,.bg-glow,.topbar,#toc,#toTop,.filterbar{display:none!important}
+  .layout{display:block}
+  main{max-width:none;padding:0}
+  .chap{page-break-inside:auto;margin-bottom:28px}
+  .chap-head{border-bottom:1px solid #bbb}
+  h2,h3,h4,p,li,td{color:#111!important}
+  .card,.fig,.tbl-wrap,.note{border-color:#ccc!important;background:#fff!important}
+  table.tbl th{background:#eee!important;color:#111!important}
+  table.tbl td{color:#222!important;border-bottom:1px solid #ddd}
+  a{color:#0b6e8a}
+  .chip{border-color:#999!important;color:#333!important}
+}
+</style>
+</head>
+<body class="vol-all">
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-text">WHEEL-LEGGED UCP <b>/ 问题域规格书 · BRS + BtRS</b></span>
+  </div>
+  <div class="volswitch" id="volswitch">
+    <button data-vol="all" class="on">全文</button>
+    <button data-vol="brs">BRS</button>
+    <button data-vol="strs">BtRS / StRS</button>
+  </div>
+  <button class="iconbtn" id="printBtn" title="打印 / 存为 PDF">打印</button>
+</header>
+
+<div class="layout">
+  <aside id="toc" aria-label="目录"></aside>
+  <main id="doc">
+
+    <!-- ==================== 封面 ==================== -->
+    <section class="cover" id="cover">
+      <div class="kicker">PROBLEM DOMAIN · CONCEPT DEFINITION · 2026</div>
+      <h1>轮腿式无人作战平台<br /><em>业务需求规格说明 BRS</em> &amp; <em>相关方需求规格说明 BtRS</em></h1>
+      <p class="sub">
+        本文件是「轮腿式无人作战平台（Wheel-Legged Unmanned Combat Platform, UCP）」项目在<b>问题域</b>的两份核心规格：
+        按 ISO/IEC/IEEE 15288:2023 的「业务或使命分析过程」产出 <b>BRS</b>，按「相关方需要与需求定义过程」产出 <b>BtRS（即 StRS）</b>。
+        重点论述：<b>业务/任务需求、运营概念 ConOps、运行概念 OpsCon、相关方列表、相关方需求</b>，
+        并给出任务需求—相关方需要—相关方需求—架构落点的完整追溯。
+      </p>
+      <div class="meta">
+        <span class="m"><b>SoI</b> 轮腿式无人作战平台整机</span>
+        <span class="m"><b>层级</b> 任务 · 体系 · 整机</span>
+        <span class="m"><b>过程</b> 15288 业务或使命分析 / 相关方需要与需求定义</span>
+        <span class="m"><b>基线</b> 概念阶段（对应型号研制立项论证→任务书）</span>
+        <span class="m"><b>版本</b> V1.0</span>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- ==================== 第 一 卷 · BRS ===================== -->
+    <!-- ========================================================= -->
+
+    <section class="chap" id="brs-1" data-vol="brs" data-group="brs" data-t="BRS-1 简介">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 1</span>
+        <div>
+          <h2>简介</h2>
+          <span class="chap-sub">PURPOSE · SCOPE · BUSINESS OVERVIEW · DEFINITIONS · STAKEHOLDERS</span>
+        </div>
+      </div>
+
+      <h3 id="brs-1-1"><span class="n">1.1</span>业务目的</h3>
+      <p class="lead">
+        本项目的业务目的，是在<b>未来高烈度局部冲突与城市/室内作战</b>中，为营连级合成部队补上一块当前装备体系缺的能力：
+        一个能够进入废墟、楼梯间、地下空间与室内死角，并把「看得见的」快速转化为「打得准的」的<b>可消耗前沿节点</b>。
+      </p>
+
+      <h4><span class="n">1.1.1</span>业务驱动：三个正在同时发生的变化</h4>
+      <div class="grid g3">
+        <div class="card">
+          <div class="ct"><span class="tag">作战形态</span>战场向非结构化空间下沉</div>
+          <div class="cd">
+            城镇攻坚、地下设施清剿、山地隘口争夺成为主要作战样式。作战空间从「开阔地 + 装甲对抗」转向「建筑内部 + 废墟 + 地下」，
+            而现有履带式/轮式无人车在这些地形上的通过性、体积与噪声均不满足要求。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">人员风险</span>有人分队首入伤亡不可接受</div>
+          <div class="cd">
+            城镇作战中首批进入建筑与废墟的分队暴露时间最长、伤亡率最高。指挥员的现实诉求是
+            「先让机器进去把人找出来」，而不是「让人先进去试探」。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">作战体系</span>杀伤链需要更短的闭环</div>
+          <div class="cd">
+            分布式作战要求「传感器—决策者—射手」在同一时间尺度内闭环。当前班组级侦察与火力引导高度依赖人工口述与地图标注，
+            从发现目标到火力反应往往以「分钟」计，难以抓住时敏目标。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">1.1.2</span>业务目的（Business Objectives）</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:78px">编号</th><th style="width:220px">业务目的</th><th>说明与业务价值</th><th style="width:150px">衡量依据</th></tr></thead>
+            <tbody>
+              <tr><td class="id">BO-01</td><td class="name">补足复杂地形与室内空间的能力缺口</td><td>使班组具备进入楼梯、废墟、地下空间、狭小室内实施侦察与打击的手段，把「进不去」变成「进得去、看得见」。</td><td>MOE-1 侦察点覆盖率</td></tr>
+              <tr><td class="id">BO-02</td><td class="name">降低有人作战人员暴露与伤亡</td><td>以可消耗平台替代人员执行首入侦察、诱饵暴露、抵近观察等高危动作，减少人员在杀伤区的驻留时间。</td><td>MOE-2 人员暴露时间</td></tr>
+              <tr><td class="id">BO-03</td><td class="name">压缩杀伤链闭环时间</td><td>把目标发现、定位、识别、授权、打击引导压缩到同一战术节奏内，使班组能够打击时敏目标。</td><td>MOE-3 闭环时间</td></tr>
+              <tr><td class="id">BO-04</td><td class="name">接入体系形成弹性杀伤网</td><td>平台作为体系中的一个可消耗边缘节点，可被即插即用接入、可被重构补位，局部损毁不导致整链失效。</td><td>MOE-4 入网时间 / 重构时间</td></tr>
+              <tr><td class="id">BO-05</td><td class="name">合规可控，避免政治与舆论代价</td><td>致命性打击决策始终由人作出，具备平民识别、射击安全扇区、全程记录与事后追溯能力，降低误伤与法律风险。</td><td>MOE-7 合规零误伤</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-1　业务目的与衡量依据的对应</div>
+      </div>
+
+      <h4><span class="n">1.1.3</span>明确不做的事（防止范围蔓延）</h4>
+      <ul>
+        <li><b>不是要替代有人战车</b>：平台定位是「伴随 + 前出」的耗材型节点，不承担正面装甲对抗与持续火力压制的主力角色。</li>
+        <li><b>不是通用机器人平台</b>：不追求全地形全任务的通用性，聚焦城镇/复杂地形下的侦察—指示—有限打击。</li>
+        <li><b>不追求全自主交战</b>：现行政策与伦理约束下，致命性打击保持「人在回路」，本项目不将全自主开火列为目标能力。</li>
+      </ul>
+
+      <h3 id="brs-1-2"><span class="n">1.2</span>业务范围</h3>
+      <h4><span class="n">1.2.1</span>业务域识别</h4>
+      <p>
+        业务域名称：<b>陆军地面无人作战装备（复杂地形与城镇作战方向）</b>。
+        该业务域覆盖装备的论证、研制、试验鉴定、列装、训练、保障与退役全过程；在作战运用上覆盖营连级分队的侦察、目标指示、
+        伴随支援与通信中继等业务活动。
+      </p>
+
+      <h4><span class="n">1.2.2</span>范围边界</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:90px">边界</th><th style="width:300px">内容</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td class="id">范围内</td><td class="name">整机与六大功能系统</td><td>轮腿复合移动、智能感知与导航、作战载荷与武器管理、指挥控制与通信、能源与热管理、结构与防护。</td></tr>
+              <tr><td class="id">范围内</td><td class="name">任务载荷的接口与集成</td><td>侦察载荷、轻武器站、电子战模块的机械/电气/数据接口，以及「一平台多任务」的快速换装能力。</td></tr>
+              <tr><td class="id">范围内</td><td class="name">体系接入与协同软件</td><td>数据链协议适配、态势上报、任务式指挥接入、有人无人协同接口、算法 OTA 与数据回传。</td></tr>
+              <tr><td class="id">范围内</td><td class="name">保障与训练适配</td><td>模块级快换设计、BIT 自检、前线抢修规程、操作与维护训练大纲的输入需求。</td></tr>
+              <tr><td class="id">范围外</td><td class="name">弹药与引信研制</td><td>由弹药供应商按既有型谱提供，本项目仅提出接口与后坐管理约束。</td></tr>
+              <tr><td class="id">范围外</td><td class="name">上级指挥信息系统核心改造</td><td>本项目只做协议适配与接口符合性，不改变体系指控软件的架构与主干功能。</td></tr>
+              <tr><td class="id">范围外</td><td class="name">通信基础设施与卫星资源</td><td>自组网电台、卫通终端作为货架产品选用；频谱分配由频谱管理机构负责。</td></tr>
+              <tr><td class="id">范围外</td><td class="name">有人战车与步兵班组的编制调整</td><td>编制与战术运用由使用方决定，本项目提供编组运用的能力与约束输入。</td></tr>
+              <tr><td class="id">范围外</td><td class="name">批产产线与供应链建设</td><td>由主承包商与配套体系承担，本项目提出产能与配套成熟度要求。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-2　业务范围边界</div>
+      </div>
+
+      <h4><span class="n">1.2.3</span>范围假设</h4>
+      <ul>
+        <li>假设 A1：体系数据链协议与态势图标准在研制期内保持稳定，或变更可控（变更将触发接口需求迭代）。</li>
+        <li>假设 A2：作战使用遵循现行交战规则与授权链，平台不承担规则制定职能。</li>
+        <li>假设 A3：使用方具备基本的前线保障能力（换电、模块更换、故障代码读取）。</li>
+        <li>假设 A4：可消耗定位成立，即单机成本控制在「可承受战损」的量级，允许在高风险任务中损失。</li>
+      </ul>
+
+      <h3 id="brs-1-3"><span class="n">1.3</span>业务概况</h3>
+      <p>业务概况描述相关业务领域内的主要分块与外部实体及其相互关系。本项目处于「装备研制采办链」与「作战运用链」的交汇点。</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">内部</span>研制与保障链</div>
+          <div class="cd">
+            <b>装备总体研制单位（主承包商）</b>：总体方案、系统集成、整车联调、样机试制与定型。<br />
+            <b>分系统配套供应商</b>：动力与轮腿执行机构、伺服电机与减速器、感知传感器、导航定位、边缘计算单元、通信链路、任务载荷。<br />
+            <b>算法与模型提供方</b>：目标识别、路径规划、协同决策模型，负责 OTA 迭代与数据闭环。<br />
+            <b>试验鉴定机构</b>：环境试验、越障试验、靶场效能试验、定型评审。<br />
+            <b>批产与保障体系</b>：总装、备件供应、维修与训练支持。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">外部</span>采办与运用链</div>
+          <div class="cd">
+            <b>军方采办部门</b>：立项、预算、合同、验收、采购数量决策。<br />
+            <b>作战部队（营连级）</b>：战术运用、训练、战场反馈。<br />
+            <b>体系指挥控制网络</b>：任务下达、态势汇聚、授权管理。<br />
+            <b>友邻无人集群与有人战车</b>：编组协同、目标交接、路权与频谱协调。<br />
+            <b>保障分队</b>：补给、换电、抢修、回收。<br />
+            <b>约束方</b>：频谱管理、网络安全保密、伦理与法规、试验鉴定。<br />
+            <b>被影响方</b>：平民与非战斗人员、自然环境、公众舆论。
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="k">BUSINESS PICTURE / 一句话业务图景</span>
+        主承包商向下整合供应链形成「一台可消耗的轮腿式无人作战平台」，向上通过体系接口接入「一张分布式杀伤网」，
+        最终在营连级分队手中形成「先看后打、少死人、打得快」的战术价值。链条上任何一个环节的标准不统一，价值都会在交付端打折。
+      </div>
+
+      <h3 id="brs-1-4"><span class="n">1.4</span>定义与缩略语</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:120px">术语</th><th style="width:150px">英文 / 缩写</th><th>释义（在本项目语境下的含义）</th></tr></thead>
+            <tbody>
+              <tr><td class="name">相关方</td><td class="mono">Stakeholder</td><td>对系统拥有合法权益的任何实体（个人或组织），包括可能受影响或能够影响系统的所有人员。</td></tr>
+              <tr><td class="name">需要</td><td class="mono">Need</td><td>相关方站在自身立场表达的意图与期望，隐含、不完整、可能彼此冲突，是需求的输入。</td></tr>
+              <tr><td class="name">需求</td><td class="mono">Requirement</td><td>经分析、权衡、协商后形成的可验证的正式表达，必含约束、边界与验收判据。</td></tr>
+              <tr><td class="name">运营概念</td><td class="mono">ConOps</td><td>组织层：领导想以什么方式运作组织，涉及多个系统组合形成的体系，多对多关系。</td></tr>
+              <tr><td class="name">运行概念</td><td class="mono">OpsCon / OCD</td><td>系统层：以某一确定系统为核心，描述它要做什么、为什么这样做，一对多关系。</td></tr>
+              <tr><td class="name">业务需求规格说明</td><td class="mono">BRS</td><td>组织层面描述业务环境、目的与目标、业务模型、业务运行需求与提案系统初步运行概念的文件。</td></tr>
+              <tr><td class="name">相关方需求规格说明</td><td class="mono">BtRS / StRS</td><td>从用户与相关方视角描述使用场景下的流程、策略、规则与高层需求的文件，本卷第二部分。</td></tr>
+              <tr><td class="name">方案类</td><td class="mono">Solution Class</td><td>解决问题或利用机会的候选方案类别（如「履带式」「轮式」「轮腿复合式」），在业务或使命分析中评估与排序。</td></tr>
+              <tr><td class="name">效能度量</td><td class="mono">MOE</td><td>Measure of Effectiveness：从使命/任务层面衡量方案是否有效的度量，由相关方需求导出。</td></tr>
+              <tr><td class="name">性能度量</td><td class="mono">MOS</td><td>Measure of Suitability/Performance：从系统性能层面衡量满足程度的度量。</td></tr>
+              <tr><td class="name">任务式指挥</td><td class="mono">Mission Command</td><td>上级下达意图、任务与约束，执行层自主决定方法；是平台接入体系的核心指挥模式。</td></tr>
+              <tr><td class="name">交战规则</td><td class="mono">ROE</td><td>规定在何种条件下可实施何种武力的规则集合，是平台火控逻辑的外部输入与硬约束。</td></tr>
+              <tr><td class="name">人在回路</td><td class="mono">Human-in-the-Loop</td><td>致命性打击的最终授权由人类作出，平台不得自主完成「识别—授权—击发」全链。</td></tr>
+              <tr><td class="name">任务剖面</td><td class="mono">Mission Profile</td><td>从投送到撤收的完整任务时序，用于派生运行阶段、状态与保障需求。</td></tr>
+              <tr><td class="name">机内自检</td><td class="mono">BIT</td><td>Built-In Test：平台开机自检与运行中自检，输出故障代码与隔离结论。</td></tr>
+              <tr><td class="name">OTA</td><td class="mono">Over-the-Air</td><td>远程在线升级，用于算法模型、战术规控逻辑的迭代而不返厂。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-3　术语与缩略语（完整版见各卷附录）</div>
+      </div>
+
+      <h3 id="brs-1-5"><span class="n">1.5</span>主要相关方（概览）</h3>
+      <p>
+        本文件识别出 <b>4 大类、20 类</b>相关方。本章仅给出概览以满足 BRS 的信息项要求；完整的交互要素、利益点、态度、影响力与重要性分析，
+        以及由此导出的 20 条相关方需要与需求，见第二卷 <a href="#strs-1-5">BtRS 第 1.5 节</a> 与 <a href="#ap-a">附录 A</a>、<a href="#ap-b">附录 B</a>。
+      </p>
+
+      <div class="stats">
+        <div class="stat"><div class="v">4<small>类</small></div><div class="l">直接 / 交互 / 约束 / 被影响</div></div>
+        <div class="stat"><div class="v">20<small>类</small></div><div class="l">已识别相关方</div></div>
+        <div class="stat"><div class="v">12<small>条</small></div><div class="l">业务/任务需求 TR</div></div>
+        <div class="stat"><div class="v">20<small>条</small></div><div class="l">相关方需求 SR</div></div>
+        <div class="stat"><div class="v">7<small>项</small></div><div class="l">效能度量 MOE</div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:110px">类别</th><th style="width:250px">相关方</th><th>对业务的影响方式</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip c-direct">直接</span></td><td class="name">一线作战班组</td><td>最终使用者与需求提出者，其战术运用方式直接决定装备价值能否释放。</td></tr>
+              <tr><td><span class="chip c-direct">直接</span></td><td class="name">敌方电子战 / 火力单元</td><td>对抗性相关方，决定平台的生存性设计边界与抗干扰指标。</td></tr>
+              <tr><td><span class="chip c-direct">直接</span></td><td class="name">同编队友军无人集群</td><td>协同性相关方，要求路权、频谱与目标分配的互不干扰。</td></tr>
+              <tr><td><span class="chip c-direct">直接</span></td><td class="name">有人战车 / 突击车乘员</td><td>编组内指挥者，要求平台速度可比、接口互通、不拖后腿。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">体系指挥控制网络</td><td>提供任务下达与态势汇聚，其协议标准构成平台的强合规约束。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">算法与 AI 模型提供方</td><td>决定平台「越用越聪明」的速度，影响算力与数据接口设计。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">前沿充电桩 / 换电站</td><td>提供能量补给，其接口标准决定换电时间与保障效率。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">卫星通信 / 数据链运营商</td><td>提供物理信道，带宽与时延决定远程遥控与数据回传能力。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">高精地图与地理情报机构</td><td>提供先验地图，影响定位精度与自主导航策略。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">武器载荷 / 弹药供应商</td><td>提供武器站与弹药，接口标准化决定换装灵活性。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">前线运输投送部队</td><td>决定平台能否到达战场，其运输工具限定了重量与外形。</td></tr>
+              <tr><td><span class="chip c-inter">交互</span></td><td class="name">装备维修与抢修分队</td><td>决定平台的持续作战能力，要求模块级快拆与故障隔离。</td></tr>
+              <tr><td><span class="chip c-cons">约束</span></td><td class="name">装备采办与试验鉴定局</td><td>掌握定型与列装否决权，间接决定项目的生与死。</td></tr>
+              <tr><td><span class="chip c-cons">约束</span></td><td class="name">频谱管理与法规机构</td><td>用频许可与电磁兼容标准，约束通信与电子战设计。</td></tr>
+              <tr><td><span class="chip c-cons">约束</span></td><td class="name">网络安全与保密部门</td><td>加密、抗劫持、数据销毁要求，约束计算与存储架构。</td></tr>
+              <tr><td><span class="chip c-cons">约束</span></td><td class="name">国际战争伦理委员会</td><td>自主武器伦理审查与舆论制裁，约束开火自主性边界。</td></tr>
+              <tr><td><span class="chip c-aff">被影响</span></td><td class="name">平民 / 非战斗人员</td><td>承受误伤风险，要求识别、避让与安全扇区锁死能力。</td></tr>
+              <tr><td><span class="chip c-aff">被影响</span></td><td class="name">敌方战俘 / 伤员</td><td>受国际人道法保护，要求识别投降与非武装姿态。</td></tr>
+              <tr><td><span class="chip c-aff">被影响</span></td><td class="name">自然环境与生态</td><td>承受噪声、地貌扰动与电池污染风险，要求环保与低噪声设计。</td></tr>
+              <tr><td><span class="chip c-aff">被影响</span></td><td class="name">新闻媒体与公众舆论</td><td>通过报道与监督反向塑造项目正当性，要求过程可追溯。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-4　主要相关方概览（按关系类型划分，完整分析见第二卷附录 A）</div>
+      </div>
+    </section>
+
+    <section class="chap" id="brs-2" data-vol="brs" data-group="brs" data-t="BRS-2 参考文献">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 2</span>
+        <div>
+          <h2>参考文献</h2>
+          <span class="chap-sub">REFERENCES &amp; APPLICABLE DOCUMENTS</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:230px">文件</th><th style="width:120px">类型</th><th>在本项目中的作用</th></tr></thead>
+            <tbody>
+              <tr><td class="name">ISO/IEC/IEEE 15288:2023</td><td>国际标准</td><td>系统生存周期过程；界定业务或使命分析过程与相关方需要与需求定义过程的输入、活动与输出。</td></tr>
+              <tr><td class="name">ISO/IEC/IEEE 29148:2018</td><td>国际标准</td><td>需求工程；提供 BRS 与 StRS 的文档轮廓（表 4-1、表 4-5）与需求质量特性。</td></tr>
+              <tr><td class="name">INCOSE《系统工程手册》第 4 版</td><td>行业手册</td><td>过程 IPO 图、需求获取方法推荐、相关方分析表示矩阵。</td></tr>
+              <tr><td class="name">NASA《系统工程手册》</td><td>行业手册</td><td>ConOps / OpsCon 的实践范例与概念文档开发指南。</td></tr>
+              <tr><td class="name">ANSI/AIAA G043A:2012</td><td>行业指南</td><td>运行概念文档（OCD）的编制指南与模板来源。</td></tr>
+              <tr><td class="name">BABOK（IIBA）</td><td>知识体系</td><td>业务分析策略、问题定义、业务需求与相关方需求的拆分方法。</td></tr>
+              <tr><td class="name">郭宝柱《系统工程——基于国际标准过程的研究与实践》第 4 章</td><td>专著</td><td>本文件的框架依据：概念定义、ConOps/OpsCon 辨析、BRS/StRS 轮廓与起落架案例的「阶段—情况—活动」推演方法。</td></tr>
+              <tr><td class="name">《日内瓦公约》及其附加议定书</td><td>国际法</td><td>区分原则、比例原则、预防措施，构成平民与战俘保护需求的法源。</td></tr>
+              <tr><td class="name">国家军用标准（GJB）相关分系统规范</td><td>军用标准</td><td>环境适应性、电磁兼容、可靠性、维修性、保障性等通用要求。</td></tr>
+              <tr><td class="name">项目上卷《层级解构与体系协同》</td><td>项目文件</td><td>任务—体系—整机—系统—子系统—模块的层级定义与指标基线来源。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 2-1　引用文件</div>
+      </div>
+    </section>
+
+    <section class="chap" id="brs-3" data-vol="brs" data-group="brs" data-t="BRS-3 业务管理需求">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 3</span>
+        <div>
+          <h2>业务管理需求</h2>
+          <span class="chap-sub">BUSINESS ENVIRONMENT · MISSION, GOALS &amp; OBJECTIVES · BUSINESS MODEL · INFORMATION ENVIRONMENT</span>
+        </div>
+      </div>
+
+      <h3 id="brs-3-1"><span class="n">3.1</span>业务环境</h3>
+      <p>
+        业务环境包含影响业务、进而影响待开发系统的内外部条件。本项目采用 PESTEL 框架展开外部环境，
+        并对内部研制能力与保障条件做同步评估。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:140px">维度</th><th style="width:320px">关键因素</th><th>对项目的约束或驱动</th></tr></thead>
+            <tbody>
+              <tr><td class="name">政治与政策</td><td>无人作战装备发展规划、装备预研与列装政策、自主武器相关立场</td><td>决定项目优先级与经费投向；限定「人在回路」的自主性红线，直接影响火控与授权设计。</td></tr>
+              <tr><td class="name">经济与采办</td><td>军品定价机制、批次采购规模、全寿命费用（LCC）控制要求</td><td>单机必须落在「可承受战损」的成本区间，否则「可消耗」定位不成立，战术运用方式随之改变。</td></tr>
+              <tr><td class="name">社会与舆论</td><td>公众对自主杀伤的敏感度、误伤平民事件的舆论放大效应</td><td>要求全程记录、可事后追溯、平民识别与安全扇区锁死，构成硬需求而非可选项。</td></tr>
+              <tr><td class="name">技术环境</td><td>轮腿执行机构成熟度、边缘 AI 算力、高能量密度电池、自组网电台、激光雷达成本</td><td>决定轮腿复合构型的可行性；也决定「能力天花板」——算力与能源直接约束自主等级。</td></tr>
+              <tr><td class="name">环境与地形</td><td>城镇废墟、楼梯、地下空间、山地隘口、雨雾烟尘、高低温</td><td>构成通行性与感知的主要挑战，导出越障、爬坡、防护与多光谱感知需求。</td></tr>
+              <tr><td class="name">法律与标准</td><td>国际人道法、交战规则、GJB 环境与电磁兼容标准、频谱许可</td><td>构成合规基线；用频许可与电磁兼容直接约束通信与电子战模块的设计。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-1　外部环境分析（PESTEL）</div>
+      </div>
+
+      <h4><span class="n">3.1.1</span>威胁环境</h4>
+      <div class="grid g4">
+        <div class="card"><div class="ct">电磁压制</div><div class="cd">宽带噪声压制、GPS 欺骗与拒止、链路劫持尝试，导致遥控失效、定位漂移。</div></div>
+        <div class="card"><div class="ct">反无人系统</div><div class="cd">便携式干扰枪、网捕、火力拦截、FPV 自杀式撞击，压缩平台的暴露窗口。</div></div>
+        <div class="card"><div class="ct">城市复杂遮蔽</div><div class="cd">建筑遮挡导致视距链路中断、GNSS 多路径与室内失效，依赖自主导航与自组网。</div></div>
+        <div class="card"><div class="ct">非战斗人员混杂</div><div class="cd">平民、被胁迫人员与作战人员混杂，识别窗口短、误判代价极高。</div></div>
+      </div>
+
+      <h4><span class="n">3.1.2</span>内部条件</h4>
+      <ul>
+        <li><b>研制能力</b>：具备轮腿复合构型、多传感器融合、边缘 AI 部署、武器站伺服集成的工程能力；短板在长时足式步态的能耗与可靠性验证。</li>
+        <li><b>供应链</b>：伺服电机、减速器、激光雷达、AI 芯片等关键件存在自主可控与供货周期风险，需在模块层预留国产替代接口。</li>
+        <li><b>试验条件</b>：需建设/借用越障试验场（楼梯、废墟、壕沟、斜坡）、室内 GPS 拒止试验场、电磁对抗环境模拟与靶场射击试验条件。</li>
+        <li><b>保障条件</b>：前线换电、模块更换、故障代码判读需在无复杂工具条件下完成，倒逼模块化与 BIT 设计。</li>
+      </ul>
+
+      <h3 id="brs-3-2"><span class="n">3.2</span>使命、目的与目标</h3>
+
+      <div class="note good">
+        <span class="k">MISSION STATEMENT / 使命声明</span>
+        为营连级合成部队提供一种<b>可消耗、可接入体系、能进入非结构化战场空间的轮腿式无人作战平台</b>，
+        使其在城镇与复杂地形作战中先于人员发现目标、先于人员完成打击引导，从而以更低的人员代价维持作战节奏。
+      </div>
+
+      <h4><span class="n">3.2.1</span>目的（Objectives）与目标（Goals）</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:78px">编号</th><th style="width:180px">类型</th><th style="width:250px">表述</th><th>度量口径</th></tr></thead>
+            <tbody>
+              <tr><td class="id">OBJ-1</td><td>目的（定性）</td><td>让班组具备「机器先进去」的能力</td><td>能在无人员进入的条件下完成建筑内部与废墟的侦察覆盖。</td></tr>
+              <tr><td class="id">OBJ-2</td><td>目的（定性）</td><td>把感知优势转成火力优势</td><td>侦察结果可直接生成可用的打击引导数据，而非「看着好看」的视频。</td></tr>
+              <tr><td class="id">OBJ-3</td><td>目的（定性）</td><td>成为体系中的弹性节点</td><td>入网即用、损毁可补、链路可绕。</td></tr>
+              <tr><td class="id">GL-1</td><td>目标（量化）</td><td>侦察点覆盖率 ≥ 90%（指定建筑/废墟区域）</td><td>以任务规划给出的必查点位为分母，实查点位为分子。</td></tr>
+              <tr><td class="id">GL-2</td><td>目标（量化）</td><td>人员暴露时间下降 ≥ 50%</td><td>同类任务对比：使用平台前后的入楼人员累计暴露时长。</td></tr>
+              <tr><td class="id">GL-3</td><td>目标（量化）</td><td>杀伤链闭环 ≤ 90 s</td><td>从目标首次被探测到射击指令下达的时间戳差。</td></tr>
+              <tr><td class="id">GL-4</td><td>目标（量化）</td><td>体系入网时间 ≤ 3 min</td><td>加电自检完成到态势图上出现有效节点的时长。</td></tr>
+              <tr><td class="id">GL-5</td><td>目标（量化）</td><td>单次任务可用率 ≥ 85%</td><td>可用时长 / 任务总时长（含降级运行）。</td></tr>
+              <tr><td class="id">GL-6</td><td>目标（量化）</td><td>平民误伤事件 = 0</td><td>全寿命试验与使用记录中的合规事件计数。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-2　目的与目标（符合 SMART：具体、可测、可达成、相关、有时限）</div>
+      </div>
+
+      <h4><span class="n">3.2.2</span>效能度量（MOE）</h4>
+      <p>MOE 由业务目标导出，用于在方案评估与后续验证中回答「这个系统是否真的解决了业务问题」，而不是「参数是否达标」。</p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th style="width:180px">效能度量</th><th style="width:120px">目标值</th><th>度量定义</th><th style="width:150px">验证方式</th></tr></thead>
+            <tbody>
+              <tr><td class="id">MOE-01</td><td class="name">复杂地形侦察覆盖率</td><td>≥ 90%</td><td>指定区域内必查点位被有效侦察（视频回传 + 坐标标定）的比例。</td><td>靶场演示 + 试验数据统计</td></tr>
+              <tr><td class="id">MOE-02</td><td class="name">人员暴露时间下降率</td><td>≥ 50%</td><td>同类任务有人/无人方案的人员进入杀伤区累计时长对比。</td><td>对抗演习对比分析</td></tr>
+              <tr><td class="id">MOE-03</td><td class="name">杀伤链闭环时间</td><td>≤ 90 s</td><td>目标首次探测至射击指令下达的时间差（P90）。</td><td>实兵实弹/模拟交战测试</td></tr>
+              <tr><td class="id">MOE-04</td><td class="name">体系接入与重构时效</td><td>入网 ≤ 3 min；重构 ≤ 60 s</td><td>节点接入体系到可用；单节点失效后链路恢复的时间。</td><td>注入式故障试验</td></tr>
+              <tr><td class="id">MOE-05</td><td class="name">任务可用率</td><td>≥ 85%</td><td>任务期间平台可提供有效能力（含降级能力）的时长占比。</td><td>可靠性试验统计</td></tr>
+              <tr><td class="id">MOE-06</td><td class="name">可负担性（可消耗性）</td><td>单机成本落入可承受战损区间</td><td>单机采购成本 / 同任务有人方案的人员风险成本折算。</td><td>费用分析 + 采办评审</td></tr>
+              <tr><td class="id">MOE-07</td><td class="name">交战合规性</td><td>误伤 0 起；记录完整率 100%</td><td>平民误伤事件数；交战过程音视频与授权链记录的完整性。</td><td>合规审查 + 记录抽查</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-3　效能度量 MOE（与 BtRS 附录 E 的验证准则对应）</div>
+      </div>
+
+      <h3 id="brs-3-3"><span class="n">3.3</span>业务模型</h3>
+      <p>业务模型描述「业务目标有望实现的方法」。本项目属于军品研制采办业务，业务模型由三部分构成：采办与研制流程模型、价值与伙伴关系模型、成本与风险模型。</p>
+
+      <h4><span class="n">3.3.1</span>采办与研制流程模型</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">阶段</th><th style="width:230px">主要活动</th><th>关键交付物</th><th style="width:120px">本文件作用</th></tr></thead>
+            <tbody>
+              <tr><td class="name">立项论证</td><td>作战需求分析、能力差距分析、方案类评估</td><td>立项论证报告、<b>BRS</b>、首选解决方案类</td><td><span class="chip chip-plain">本卷输入</span></td></tr>
+              <tr><td class="name">方案设计</td><td>相关方需求确认、运行概念细化、方案权衡</td><td><b>BtRS</b>、OCD、系统规范草案</td><td><span class="chip chip-plain">本卷输入</span></td></tr>
+              <tr><td class="name">工程研制</td><td>详细设计、样机试制、分系统联调</td><td>SyRS、设计文件、样机</td><td>需求基线</td></tr>
+              <tr><td class="name">试验鉴定</td><td>环境试验、越障试验、靶场效能试验</td><td>试验大纲与报告、鉴定结论</td><td>验证依据</td></tr>
+              <tr><td class="name">定型列装</td><td>定型审查、批产、部队试用</td><td>定型文件、列装目录</td><td>需求符合性</td></tr>
+              <tr><td class="name">训练与保障</td><td>训练大纲、备件与维修体系、算法迭代</td><td>训练教材、保障方案、OTA 版本</td><td>支持概念</td></tr>
+              <tr><td class="name">退役处置</td><td>脱密审查、电池回收、数据销毁</td><td>退役处置方案</td><td>弃置概念</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-4　采办与研制流程模型（与型号研制生存周期的概念阶段对应）</div>
+      </div>
+
+      <h4><span class="n">3.3.2</span>价值与伙伴关系模型</h4>
+      <div class="grid g3">
+        <div class="card">
+          <div class="ct"><span class="tag">价值主张</span></div>
+          <div class="cd">用一台可消耗平台，换取「人员不入险地、目标先被发现、火力更快落下」。
+            价值不在单机参数，而在<b>班组任务成功率的提升幅度</b>与<b>人员风险的下降幅度</b>。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">伙伴关系</span></div>
+          <div class="cd">主承包商（总体集成）+ 一级配套（执行机构、传感、算力、通信）+ 算法提供方（模型与 OTA）+ 弹药供应商（武器站与弹药）+ 保障体系（备件与维修）。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">收益路径</span></div>
+          <div class="cd">小批量试用 → 战术验证 → 定型批产 → 全寿命保障与算法升级服务。算法迭代形成持续收入与持续能力增长。</div>
+        </div>
+      </div>
+
+      <h4><span class="n">3.3.3</span>成本与风险模型</h4>
+      <ul>
+        <li><b>成本结构</b>：单机硬件（执行机构、感知、算力、电池、武器站接口）约占主要成本；试验与鉴定、算法开发、保障体系建设构成其余部分。</li>
+        <li><b>可消耗性判据</b>：单机成本应落入「一次高风险任务可承受损失」的区间，否则战术上不敢前出，「诱饵」「首入」等用法失效。</li>
+        <li><b>主要风险</b>：①足式步态长时可靠性不足 → 影响可用率；②关键件供货与自主可控 → 影响进度；③算法在真实城镇场景的识别泛化不足 → 影响 MOE-01/MOE-03；④合规审查不通过 → 影响列装。</li>
+      </ul>
+
+      <h3 id="brs-3-4"><span class="n">3.4</span>信息环境</h3>
+      <p>信息环境描述组织级、决定多个信息系统公共基础的总体战略，包含项目组合、长期系统计划与数据配置三方面。</p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:160px">要素</th><th>内容与约束</th></tr></thead>
+            <tbody>
+              <tr><td class="name">项目组合</td><td>本平台与侦察无人机、察打无人机、无人车、巡飞弹、班组终端同属「分布式杀伤网」项目群。组合管理确定：本平台与无人机的<b>侦察层次分工</b>（空中俯视 vs 地面近距）、与巡飞弹的<b>目标交接关系</b>、与班组终端的<b>交互优先级</b>。</td></tr>
+              <tr><td class="name">长期系统计划</td><td>体系数据链协议、态势图标准、敌我识别码体系、任务式指挥报文格式已确定或计划冻结。这些构成<b>设计约束</b>：平台必须适配，而非要求体系改造。协议版本升级需触发接口影响分析。</td></tr>
+              <tr><td class="name">数据库配置</td><td>①高精地图库（先验地图与增量更新）；②目标特征库（敌方人员/车辆/工事/无人机的样本与模型）；③算法模型版本库（版本、适用场景、审核记录）；④交战记录库（黑匣子数据，用于事后审查与模型再训练）。四类数据的<b>可用性、访问权限与保密等级</b>必须在架构层明确。</td></tr>
+              <tr><td class="name">数据主权与保密</td><td>交战记录与目标特征属敏感数据，需满足加密存储、权限分级、退役销毁要求；算法模型需版本可追溯、变更可审计。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-5　信息环境要素</div>
+      </div>
+
+      <div class="note">
+        <span class="k">TRACEABILITY / 业务需求编号约定</span>
+        本卷业务管理需求记作 <b>BR-01…BR-06</b>，业务运行需求记作 <b>BP / BR-R / BC / BQ</b> 系列，
+        业务/任务需求记作 <b>TR-01…TR-12</b>（源自项目任务层分解），统一在第二卷附录 D 的追溯矩阵中与相关方需求
+        <b>SR-01…SR-20</b> 建立正反向链接。
+      </div>
+    </section>
+
+    <section class="chap" id="brs-4" data-vol="brs" data-group="brs" data-t="BRS-4 业务运行需求">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 4</span>
+        <div>
+          <h2>业务运行需求</h2>
+          <span class="chap-sub">BUSINESS OPERATIONAL PROCESSES · POLICIES &amp; RULES · CONSTRAINTS · QUALITY · STRUCTURE</span>
+        </div>
+      </div>
+
+      <p class="lead">
+        业务运行需求描述「在真实业务场景中，组织如何用这套系统把事情做成」。它与功能需求的差别在于：
+        它必须写清楚<b>谁参与、输入什么、输出什么、受什么规则约束、在多长时间内完成</b>。
+      </p>
+
+      <h3 id="brs-4-1"><span class="n">4.1</span>业务过程</h3>
+      <p>业务过程按「作战运用」与「保障运用」两条主线分解为 BP-01 ~ BP-10。每个过程唯一命名与编号，供后续场景与需求引用。</p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:76px">编号</th><th style="width:160px">业务过程</th><th style="width:200px">参与方</th><th>输入 → 输出</th><th style="width:150px">时效/质量口径</th></tr></thead>
+            <tbody>
+              <tr><td class="id">BP-01</td><td class="name">任务筹划与下达</td><td>上级指挥所、分队长、平台</td><td>敌情与地形情报、作战意图 → 任务包（区域、目标类型、ROE、识别码、优先级）</td><td>下达至平台确认 ≤ 2 min</td></tr>
+              <tr><td class="id">BP-02</td><td class="name">投送与部署</td><td>投送部队、保障分队、操作员</td><td>平台运输态 → 展开、加电、自检、入网、配属到位</td><td>展开 ≤ 15 min（2 人）；入网 ≤ 3 min</td></tr>
+              <tr><td class="id">BP-03</td><td class="name">机动与渗透</td><td>平台、操作员、分队长</td><td>路径点与地形数据 → 到达侦察阵位、模式切换记录</td><td>轮式 ≥ 10 km/h；切换 ≤ 30 s</td></tr>
+              <tr><td class="id">BP-04</td><td class="name">侦察与目标标定</td><td>平台、友邻无人机、指挥节点</td><td>侦察指令 → 视频/点云、目标坐标与类型、置信度</td><td>目标标定 CEP ≤ 5 m（1 km 内）</td></tr>
+              <tr><td class="id">BP-05</td><td class="name">火力引导与打击</td><td>平台、指挥节点、火力单元</td><td>目标数据 → 引导指令、射击修正、毁伤评估</td><td>闭环 ≤ 90 s；修正量可追溯</td></tr>
+              <tr><td class="id">BP-06</td><td class="name">伴随支援与诱饵</td><td>平台、步兵分队、有人战车</td><td>编队位置与队形 → 伴随机动、压制射击、诱敌暴露</td><td>跟随误差 ≤ 5 m；响应 ≤ 3 s</td></tr>
+              <tr><td class="id">BP-07</td><td class="name">通信中继与组网</td><td>平台、被支援分队、链路管理</td><td>链路中断告警 → 中继阵位、自组网拓扑恢复</td><td>恢复 ≤ 60 s</td></tr>
+              <tr><td class="id">BP-08</td><td class="name">撤收与保障</td><td>平台、保障分队、维修分队</td><td>低电量/低弹药/任务完成 → 返航、换电、模块更换、日志上传</td><td>换电 ≤ 3 min；日志完整率 100%</td></tr>
+              <tr><td class="id">BP-09</td><td class="name">训练与考核</td><td>使用部队、训练机构、平台</td><td>训练任务 → 操作熟练度、战术运用能力、评估报告</td><td>单机操作员上岗 ≤ 16 学时</td></tr>
+              <tr><td class="id">BP-10</td><td class="name">维修、退役与处置</td><td>维修分队、保密部门、环保主管</td><td>故障/寿命终结 → 模块更换、脱密审查、电池回收、数据销毁</td><td>故障定位 ≤ 15 min；销毁可验证</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-1　业务过程清单</div>
+      </div>
+
+      <h3 id="brs-4-2"><span class="n">4.2</span>业务运营策略与规则</h3>
+      <p>策略与规则是业务流程中判断、分支与终止的逻辑，也是后续火控与协同逻辑的外部约束来源。每条规则唯一编号，在场景描述中被引用。</p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:88px">编号</th><th style="width:180px">策略/规则</th><th>内容</th><th style="width:120px">约束强度</th></tr></thead>
+            <tbody>
+              <tr><td class="id">BR-R01</td><td class="name">任务式指挥</td><td>上级只下达意图、任务边界、时间窗口与 ROE；具体路径、阵位、载体选择由分队与平台自主决定并回报。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R02</td><td class="name">开火授权归人</td><td>致命性打击必须由人类操作员（分队长/授权人）明确授权；平台不得自主完成识别—授权—击发全链。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R03</td><td class="name">区分原则</td><td>必须先区分战斗员与平民、军事目标与民用物体，识别不确定时不得实施打击。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R04</td><td class="name">比例原则</td><td>预期附带损伤不得超出自卫或军事利益；平台须在授权前给出附带损伤预估与警示。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R05</td><td class="name">安全扇区锁死</td><td>击发瞬间须确认射击扇区内无友军与已标记的平民/民用目标；条件不满足时击发电路物理断开。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R06</td><td class="name">绝对防御（无人指令时）</td><td>无人类指令且出现近距离人员闯入时，平台只执行避让、停机、退回，严禁自主开火。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R07</td><td class="name">链路中断处置</td><td>失联后先原地静默隐蔽，超时后按预设策略原路返回或就近归队；不得自主进入未授权区域。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R08</td><td class="name">优先权协调</td><td>同编队内空间路权、频谱使用、目标分配按优先级仲裁，避免互撞与互扰。</td><td><span class="chip c-cons">应遵循</span></td></tr>
+              <tr><td class="id">BR-R09</td><td class="name">记录与追溯</td><td>交战、机动、授权全过程音视频与操作日志加密记录、防篡改，供事后审查。</td><td><span class="chip c-red">强制</span></td></tr>
+              <tr><td class="id">BR-R10</td><td class="name">算法变更受控</td><td>识别模型与战术规控逻辑的 OTA 更新须经审核、留版本号、可回滚；战时更新须授权。</td><td><span class="chip c-cons">应遵循</span></td></tr>
+              <tr><td class="id">BR-R11</td><td class="name">静默与低特征优先</td><td>侦察阶段优先静音、低红外、低辐射；非必要不开主动探测与高功率发射。</td><td><span class="chip c-cons">应遵循</span></td></tr>
+              <tr><td class="id">BR-R12</td><td class="name">人机分工边界</td><td>自主等级随任务阶段与链路质量动态调整；降级时优先保障「定位、通信、回收」，可牺牲打击能力。</td><td><span class="chip c-inter">可调</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-2　业务运营策略与规则</div>
+      </div>
+
+      <h3 id="brs-4-3"><span class="n">4.3</span>业务运行约束</h3>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">BC-01 ~ BC-04　外部约束</div>
+          <div class="cd">
+            <b>BC-01 用频约束</b>：只能在分配频段内工作，带外杂散须满足标准，跳频图案需报备。<br />
+            <b>BC-02 法律约束</b>：符合国际人道法、交战规则与自主武器相关政策。<br />
+            <b>BC-03 保密约束</b>：交战记录与算法模型按涉密等级管理，出境与出区须审批。<br />
+            <b>BC-04 空运/车运约束</b>：整机折叠态须满足运输箱尺寸与重量限制，具备吊装与系留接口。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">BC-05 ~ BC-08　内部约束</div>
+          <div class="cd">
+            <b>BC-05 人员负荷</b>：单机操作员同时操控数量受认知负荷限制，界面须降低操作步骤。<br />
+            <b>BC-06 保障能力</b>：前线只能做模块级更换，不得要求复杂标定与专用工具。<br />
+            <b>BC-07 成本约束</b>：单机成本须落在可承受战损区间。<br />
+            <b>BC-08 进度约束</b>：须在规定节点前完成样机与试验，算法成熟度不得成为关键路径瓶颈。
+          </div>
+        </div>
+      </div>
+
+      <h3 id="brs-4-4"><span class="n">4.4</span>业务运行质量</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:88px">编号</th><th style="width:170px">质量特性</th><th>要求</th><th style="width:160px">优先级</th></tr></thead>
+            <tbody>
+              <tr><td class="id">BQ-01</td><td class="name">时效性</td><td>杀伤链闭环、入网、重构、换电均在战术时间尺度内完成（见 MOE-03/04/08）。</td><td>最高（时敏目标决定价值）</td></tr>
+              <tr><td class="id">BQ-02</td><td class="name">可用性</td><td>单次任务可用率 ≥ 85%；故障后降级仍可执行侦察与回收。</td><td>高</td></tr>
+              <tr><td class="id">BQ-03</td><td class="name">安全性</td><td>对己方人员无机械/电气/射击伤害风险；射击扇区与友军判定可靠。</td><td>最高（安全一票否决）</td></tr>
+              <tr><td class="id">BQ-04</td><td class="name">合规性</td><td>所有打击行为可追溯至授权人与规则条款；记录完整、防篡改。</td><td>最高（法律一票否决）</td></tr>
+              <tr><td class="id">BQ-05</td><td class="name">易用性</td><td>单机操作员上岗 ≤ 16 学时；紧急接管一步可达。</td><td>高（直接决定能否用）</td></tr>
+              <tr><td class="id">BQ-06</td><td class="name">可保障性</td><td>故障定位 ≤ 15 min；模块更换 ≤ 10 min（2 人，无专用工具）。</td><td>高</td></tr>
+              <tr><td class="id">BQ-07</td><td class="name">可负担性</td><td>单机成本与全寿命费用在可承受区间，支持批量列装。</td><td>高（决定装备规模）</td></tr>
+              <tr><td class="id">BQ-08</td><td class="name">互操作性</td><td>遵循体系协议，可即插即用接入；与友邻平台可交换目标与态势。</td><td>高</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-3　业务运行质量水平</div>
+      </div>
+
+      <h3 id="brs-4-5"><span class="n">4.5</span>业务结构</h3>
+      <p>业务结构识别与系统相关的组织结构、角色职责、地理结构与资源共享结构，并建立其与系统功能的关联。</p>
+
+      <h4><span class="n">4.5.1</span>编成结构</h4>
+      <div class="fig">
+        <svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="人机混编战术分队编成结构图">
+          <defs>
+            <style>
+              .s-t{font:600 12.5px "Microsoft YaHei","PingFang SC",sans-serif;fill:#eaf3fb}
+              .s-s{font:400 10.5px "Microsoft YaHei","PingFang SC",sans-serif;fill:#8b9cae}
+              .s-m{font:700 9.5px ui-monospace,Consolas,monospace;letter-spacing:.1em;fill:#22d3ee}
+            </style>
+            <marker id="sm1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#56677b"/>
+            </marker>
+          </defs>
+          <rect x="330" y="16" width="300" height="58" rx="8" fill="rgba(34,211,238,.07)" stroke="rgba(34,211,238,.45)"/>
+          <text x="480" y="40" text-anchor="middle" class="s-t">营 / 连级指挥所</text>
+          <text x="480" y="60" text-anchor="middle" class="s-s">任务式指挥 · 授权与 ROE 下发 · 态势汇聚</text>
+
+          <rect x="330" y="112" width="300" height="62" rx="8" fill="rgba(251,191,36,.06)" stroke="rgba(251,191,36,.45)"/>
+          <text x="480" y="136" text-anchor="middle" class="s-t">人机混编战术分队</text>
+          <text x="480" y="156" text-anchor="middle" class="s-s">分队长：开火授权 · 紧急接管 · 任务分配</text>
+
+          <rect x="30" y="212" width="190" height="60" rx="8" fill="rgba(255,255,255,.03)" stroke="rgba(140,180,210,.28)"/>
+          <text x="125" y="236" text-anchor="middle" class="s-t">有人战车 / 步兵班组</text>
+          <text x="125" y="255" text-anchor="middle" class="s-s">1 辆或 1 个班</text>
+
+          <rect x="245" y="212" width="190" height="60" rx="8" fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.5)"/>
+          <text x="340" y="236" text-anchor="middle" class="s-t">轮腿式平台 × N</text>
+          <text x="340" y="255" text-anchor="middle" class="s-s">N = 2~4（可消耗）</text>
+
+          <rect x="460" y="212" width="190" height="60" rx="8" fill="rgba(34,211,238,.06)" stroke="rgba(34,211,238,.38)"/>
+          <text x="555" y="236" text-anchor="middle" class="s-t">无人机 × M</text>
+          <text x="555" y="255" text-anchor="middle" class="s-s">M = 1~3（俯视侦察）</text>
+
+          <rect x="675" y="212" width="200" height="60" rx="8" fill="rgba(74,222,128,.06)" stroke="rgba(74,222,128,.35)"/>
+          <text x="775" y="236" text-anchor="middle" class="s-t">保障与火力支援</text>
+          <text x="775" y="255" text-anchor="middle" class="s-s">补给/抢修 · 迫击炮/巡飞弹</text>
+
+          <path d="M480,74 V108" stroke="#56677b" stroke-width="1.3" marker-end="url(#sm1)" fill="none"/>
+          <path d="M125,116 V190 H340" stroke="#56677b" stroke-width="1.1" stroke-dasharray="4 3" fill="none"/>
+          <path d="M340,174 V208" stroke="#56677b" stroke-width="1.3" marker-end="url(#sm1)" fill="none"/>
+          <path d="M555,174 V208" stroke="#56677b" stroke-width="1.3" marker-end="url(#sm1)" fill="none"/>
+          <path d="M775,174 V208" stroke="#56677b" stroke-width="1.3" marker-end="url(#sm1)" fill="none"/>
+          <path d="M340,174 H775" stroke="#56677b" stroke-width="1" stroke-dasharray="4 3" fill="none"/>
+          <text x="790" y="130" class="s-m">SIDE</text>
+          <text x="790" y="146" class="s-m">SUPPORT</text>
+        </svg>
+        <div class="fig-cap"><b>图 4-1</b>　「1 有人战车/步兵班 + N 台轮腿平台 + M 架无人机」的基础人机混编编成，与营连指挥所构成两层指挥关系。</div>
+      </div>
+
+      <h4><span class="n">4.5.2</span>角色与职责结构</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">角色</th><th style="width:230px">职责</th><th>与系统的关系</th></tr></thead>
+            <tbody>
+              <tr><td class="name">分队长 / 授权人</td><td>任务分配、开火授权、紧急接管、ROE 解释</td><td>最高权限用户；决定「打不打」，是人在回路的最终主体。</td></tr>
+              <tr><td class="name">平台操作员</td><td>遥控/监督控制、路径设定、载荷切换、异常处置</td><td>直接操控者，受认知负荷约束，界面须降低步骤。</td></tr>
+              <tr><td class="name">火力单元</td><td>接收目标数据、执行打击、回报毁伤</td><td>通过指挥节点与平台间接交互。</td></tr>
+              <tr><td class="name">维修技师</td><td>故障判读、模块更换、备件申请</td><td>通过 BIT 与故障代码与系统交互。</td></tr>
+              <tr><td class="name">保障分队</td><td>换电、补给、回收、运输</td><td>通过能量/物质接口交互。</td></tr>
+              <tr><td class="name">算法工程师</td><td>模型训练、OTA 推送、版本管理</td><td>通过数据回传与升级接口交互，不直接操控。</td></tr>
+              <tr><td class="name">试验鉴定人员</td><td>试验设计、数据采集、结论判定</td><td>通过测试接口与记录数据交互。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-4　角色与职责结构</div>
+      </div>
+
+      <h4><span class="n">4.5.3</span>地理与资源共享结构</h4>
+      <ul>
+        <li><b>地理结构</b>：后方仓储与维修基地 → 前沿补给与换电点 → 战术集结地域 → 任务区域（建筑/废墟/地下）。</li>
+        <li><b>资源共享</b>：频谱（与友邻无人机、通信分队共享）、空域（与无人机共享低空）、道路与楼梯通道（与步兵共享）、算力（边缘与后方协同计算）、目标分配权（由分队长仲裁）。</li>
+      </ul>
+    </section>
+
+    <section class="chap" id="brs-5" data-vol="brs" data-group="brs" data-t="BRS-5 初步运行概念 ConOps">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 5</span>
+        <div>
+          <h2>提案系统初步运行概念（ConOps）</h2>
+          <span class="chap-sub">CONCEPT OF OPERATIONS · 作战想定 · 多对多视角</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="k">本章定位 / WHY CONOPS HERE</span>
+        ConOps 处在<b>组织层</b>：它描述的是「领导想以什么方式打仗、这套装备在整个作战体系中扮演什么角色」，
+        是<b>多对多</b>的描述——需要考虑体系内所有系统之间的交互，而不只是平台自己。因此本章以「作战样式」而非「系统功能」为主线，
+        系统层面的「怎么做」在第二卷 OpsCon 中展开。
+      </div>
+
+      <h3 id="brs-5-1"><span class="n">5.1</span>作战背景与战略意图</h3>
+      <p>
+        未来高烈度局部冲突与城市反恐作战中，战场呈现三个叠加特征：<b>空间复杂化</b>（城市废墟、室内空间、地下设施、山地隘口）、
+        <b>电磁白热化</b>（强干扰、GPS 拒止、链路劫持）、<b>人员零容忍</b>（政治与社会对伤亡的承受阈值极低）。
+      </p>
+      <p>
+        战略意图是清晰的：<b>把「人先进入」改为「机器先进入」，把「口头协同」改为「数据协同」</b>。
+        在此意图下，轮腿式无人作战平台不是一件孤立装备，而是分布式智能杀伤网中的一个<b>可消耗、可重构的前沿边缘节点</b>。
+        它的价值由「接入体系的程度」决定，而不是由单机性能决定。
+      </p>
+
+      <div class="grid g3">
+        <div class="card hl">
+          <div class="ct"><span class="tag">定位</span>可消耗节点</div>
+          <div class="cd">允许在高风险动作（首入、诱饵、抵近标定）中损失。这一定位直接决定了成本约束、模块化快换与「无人员营救负担」的战术用法。</div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">定位</span>体系传感器 + 末端指示器</div>
+          <div class="cd">既是「看得见的眼睛」，也是「标得准的手指」。侦察不是终点，把坐标交到火力单元手上才是。</div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">定位</span>人机混编的一员</div>
+          <div class="cd">与有人战车、步兵班、无人机同编，服从同一套指挥关系与 ROE，而不是「独立作战的机器人」。</div>
+        </div>
+      </div>
+
+      <h3 id="brs-5-2"><span class="n">5.2</span>威胁与作战环境</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">维度</th><th style="width:300px">具体环境特征</th><th>对作战运用的影响</th></tr></thead>
+            <tbody>
+              <tr><td class="name">地形</td><td>城市街区、多层建筑、楼梯与电梯井、地下车库、废墟堆、壕沟、35° 以下斜坡、山地隘口</td><td>轮式高速接近 + 足式越障进入；室内 GNSS 失效，必须依赖视觉/惯性定位与先验地图。</td></tr>
+              <tr><td class="name">电磁</td><td>宽带噪声压制、GPS 欺骗、链路劫持尝试、友邻频谱拥挤</td><td>要求跳频扩频、惯导/视觉备份、自组网中继、用频纪律；链路中断后进入自主降级。</td></tr>
+              <tr><td class="name">气象与能见度</td><td>雨雾烟尘、夜间低照度、强逆光</td><td>要求可见光/红外双光、烟尘穿透能力；夜间是主要作战窗口，静音与低红外特征优先级提升。</td></tr>
+              <tr><td class="name">人员混杂</td><td>平民、被胁迫人员、伪装战斗员、投降者与伤员并存</td><td>识别窗口短；必须提供置信度、平民告警与射击扇区锁死，避免误伤。</td></tr>
+              <tr><td class="name">对抗手段</td><td>反无人干扰枪、网捕、FPV 自杀撞击、轻武器与破片</td><td>要求低特征、快速机动、局部装甲防护、被捕获前的数据自毁。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 5-1　作战环境特征与影响</div>
+      </div>
+
+      <h3 id="brs-5-3"><span class="n">5.3</span>兵力编成与指挥关系</h3>
+      <p>
+        编成模式：<b>1 辆有人战车（或 1 个步兵班）+ N 台轮腿式平台（N = 2~4）+ M 架无人机（M = 1~3）</b>
+        构成一个基础人机混编战术分队。平台数量按任务规模弹性配置，可消耗定位使其允许在任务中减员。
+      </p>
+      <p>
+        指挥关系采用<b>任务式指挥（Mission Command）</b>：上级指挥所通过体系网络下达任务区域与目标类型（如「清剿 A 栋建筑残敌」），
+        平台接入分队长的战术终端，受其直接监督与开火授权控制。指挥链为「营连指挥所 → 分队长 → 平台」，
+        平台在链路中断时按预设策略自主处置，但不得跨越授权边界。
+      </p>
+
+      <div class="note warn">
+        <span class="k">AUTHORITY BOUNDARY / 授权边界</span>
+        「自主」在本项目中不含「自主决定开火」。平台的自主权止于<b>发现、识别、标定、上报、建议</b>；
+        致命动作的授权权始终在人类手中。这一条不随技术演进而放宽，是流程与法律共同划定的边界。
+      </div>
+
+      <h3 id="brs-5-4"><span class="n">5.4</span>核心作战样式（战术运用）</h3>
+
+      <h4><span class="n">样式 A</span>城市盲区破障与首入侦察</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">场景</span>建筑内部清剿</div>
+          <div class="cd">
+            有人分队在建筑外安全区隐蔽，释放 2 台平台进入建筑。平台以足式爬楼梯、越废墟、穿门洞，
+            将实时视频、目标坐标与楼层平面回传；操作员依此判断房间占用、楼梯口威胁与撤退路线。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">价值</span>人员暴露前置替代</div>
+          <div class="cd">
+            <b>预期效果</b>：人员进入前完成 90% 以上的必查点位侦察；入楼人员暴露时间下降一半以上。<br />
+            <b>风险</b>：室内通信衰减、玻璃与镜面误检、楼梯塌陷导致平台失去机动能力。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">样式 B</span>伴随火力压制与诱饵引诱</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">场景</span>沿街推进</div>
+          <div class="cd">
+            平台伴随步兵推进，利用武器站实施压制射击；或前出充当「诱饵」，迫使敌方火力点暴露，
+            由后方无人机或迫击炮实施精确打击。诱饵用法要求平台具备快速机动与低特征。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">价值</span>以耗材换情报</div>
+          <div class="cd">
+            <b>预期效果</b>：敌方火力点暴露时间缩短，被引导打击概率提升。<br />
+            <b>风险</b>：诱饵用法与被击毁概率高度相关，必须接受「有去无回」；须保证战损数据可回收或自毁。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">样式 C</span>拒止环境组网中继</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">场景</span>强电磁干扰</div>
+          <div class="cd">
+            敌方实施强干扰导致分队通信中断时，平台自主机动至高处或关键节点，作为微型基站搭建局部自组网，
+            维持分队的「数据生命线」，并为无人机提供中继。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">价值</span>体系抗毁重构</div>
+          <div class="cd">
+            <b>预期效果</b>：局部链路中断后 60 s 内恢复连通，杀伤网不因单节点失效而整体瘫痪。<br />
+            <b>风险</b>：中继阵位本身成为高价值目标；需在中继收益与被发现风险间取得平衡。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">样式 D</span>目标标定与火力引导</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">场景</span>远程火力支援</div>
+          <div class="cd">
+            平台在抵近位置观察目标，为迫击炮、巡飞弹或远程火炮提供末端标定与射击修正；
+            打击后持续观察并回报毁伤评估，决定是否补射。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">价值</span>缩短杀伤链</div>
+          <div class="cd">
+            <b>预期效果</b>：发现到射击指令 ≤ 90 s，首轮命中率提升，弹药消耗下降。<br />
+            <b>风险</b>：平台暴露时长增加；位置与阵位需在抵近与生存之间权衡。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">样式 E</span>跨域集群协同（与无人机、无人车编组）</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">场景</span>空地一体</div>
+          <div class="cd">
+            无人机提供俯视全局与目标指示，平台提供地面近距细节与室内信息；两者数据在平台边缘或上级节点融合，
+            形成「空地互补」的目标图像，并按优先级分配目标与频谱。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">价值</span>能力互补</div>
+          <div class="cd">
+            <b>预期效果</b>：目标确认效率提升，虚警下降；避免己方装备互撞与频谱互扰。<br />
+            <b>风险</b>：协同协议不一致、时延不同步、目标重复分配。
+          </div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:70px">样式</th><th style="width:170px">名称</th><th style="width:150px">主要参与系统</th><th style="width:140px">平台角色</th><th style="width:120px">关键使能能力</th><th>主要风险</th></tr></thead>
+            <tbody>
+              <tr><td class="id">A</td><td class="name">首入侦察</td><td>平台、班组终端、无人机</td><td>前出传感器</td><td>足式越障 + 室内定位</td><td>通信衰减、地形失效</td></tr>
+              <tr><td class="id">B</td><td class="name">伴随压制 / 诱饵</td><td>平台、步兵、有人战车</td><td>火力伴随 / 诱饵</td><td>行进间稳定射击</td><td>高战损、被围困</td></tr>
+              <tr><td class="id">C</td><td class="name">组网中继</td><td>平台、被支援分队、无人机</td><td>通信节点</td><td>自组网 + 高机动占位</td><td>阵位暴露</td></tr>
+              <tr><td class="id">D</td><td class="name">火力引导</td><td>平台、火力单元、指挥节点</td><td>末端指示器</td><td>高精度标定 + 毁伤评估</td><td>暴露时间过长</td></tr>
+              <tr><td class="id">E</td><td class="name">跨域协同</td><td>平台、无人机、无人车</td><td>地面互补节点</td><td>协同协议 + 频谱协调</td><td>协议不一致、目标重复</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 5-2　五种作战样式对比（ConOps 层面的多对多交互）</div>
+      </div>
+
+      <h3 id="brs-5-5"><span class="n">5.5</span>交战规则与运营红线</h3>
+      <p>
+        平台具备较高的自主机动与目标识别能力，但<b>致命性打击的开火权始终保留在人类操作员手中</b>（人在回路）。
+        这是作战想定的组成部分，而不是系统的实现细节——它决定了平台的能力边界与考核方式。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:86px">红线</th><th style="width:220px">内容</th><th>触发后的系统行为</th></tr></thead>
+            <tbody>
+              <tr><td class="id">RL-01</td><td class="name">不得自主开火</td><td>无人类授权时，击发电路物理断开；仅可执行标定、上报、建议。</td></tr>
+              <tr><td class="id">RL-02</td><td class="name">平民闯入即停</td><td>近距离探测到人员闯入且未获指令时，自动避让/停机/退回，并上报告警。</td></tr>
+              <tr><td class="id">RL-03</td><td class="name">识别不确定不打</td><td>置信度低于阈值时标注「疑似」，禁止进入授权流程。</td></tr>
+              <tr><td class="id">RL-04</td><td class="name">友军在扇区内不打</td><td>射击安全扇区校验失败，击发被物理断开并记录失败原因。</td></tr>
+              <tr><td class="id">RL-05</td><td class="name">失联不越界</td><td>链路中断后不得自主进入未授权区域，按预设策略静默/返航。</td></tr>
+              <tr><td class="id">RL-06</td><td class="name">记录不可关断</td><td>黑匣子记录不可由操作员关闭；防篡改，供事后审查。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 5-3　运营红线（不可协商项）</div>
+      </div>
+
+      <h3 id="brs-5-6"><span class="n">5.6</span>体系角色：多对多的价值链路</h3>
+      <p>
+        ConOps 的独特之处，在于它必须描述「体系内所有系统之间的交互」。对本项目而言，平台处在四条价值链路的交汇点上：
+      </p>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">链路 1</span>侦察链</div>
+          <div class="cd">无人机（俯视）→ 平台（近距/室内）→ 指挥节点（态势融合）→ 分队长（判断）。平台是「最后一公里」的传感器，弥补空中视角被建筑遮挡的盲区。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">链路 2</span>打击链</div>
+          <div class="cd">平台（标定）→ 指挥节点（授权）→ 火力单元（迫击炮/巡飞弹/无人机）→ 平台（毁伤评估）→ 指挥节点（补射决策）。闭环中任何一环断裂，全链失效。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">链路 3</span>保障链</div>
+          <div class="cd">前沿补给点（能量/弹药）→ 平台（执行）→ 维修分队（模块更换）→ 后方基地（备件/算法）。保障链的效率直接决定出动率。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">链路 4</span>约束链</div>
+          <div class="cd">ROE 与授权链（法律）→ 火控逻辑（系统）→ 记录与审查（事后）。约束链保证「能打」不越界为「乱打」。</div>
+        </div>
+      </div>
+
+      <h3 id="brs-5-7"><span class="n">5.7</span>初步运行场景</h3>
+      <p>
+        场景是 ConOps 的落地形式，用「单线程行为」描述多系统协同。以下 8 个场景覆盖正常、退化与异常三类情况，
+        每个场景唯一编号，并在第二卷 BtRS 中被引用以派生需求。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th style="width:170px">场景名称</th><th style="width:90px">类型</th><th>叙事摘要</th><th style="width:120px">派生需求指向</th></tr></thead>
+            <tbody>
+              <tr><td class="id">SC-01</td><td class="name">多层建筑清剿</td><td><span class="chip c-direct">正常</span></td><td>分队在楼外建立警戒，2 台平台进入 1~3 层逐房间侦察，标定 2 个持械目标，分队据此选择破门顺序与火力配置。</td><td>SR-01/03/04/16</td></tr>
+              <tr><td class="id">SC-02</td><td class="name">废墟与楼梯穿越</td><td><span class="chip c-direct">正常</span></td><td>平台轮式接近废墟边缘，切换足式翻越碎块、爬 30° 楼梯，进入半塌结构内部并回传三维点云。</td><td>SR-04/19</td></tr>
+              <tr><td class="id">SC-03</td><td class="name">诱饵引出火力点</td><td><span class="chip c-direct">正常</span></td><td>平台沿街前出吸引射击，暴露敌方机枪位，无人机定位后由迫击炮摧毁；平台在暴露 40 s 后撤至掩体。</td><td>SR-01/10</td></tr>
+              <tr><td class="id">SC-04</td><td class="name">强干扰下组网中继</td><td><span class="chip c-aff">退化</span></td><td>分队链路中断，平台自主机动至楼顶，建立自组网中继，恢复态势共享与遥控，为无人机提供回传通道。</td><td>SR-02/05/14</td></tr>
+              <tr><td class="id">SC-05</td><td class="name">GPS 拒止自主返航</td><td><span class="chip c-aff">退化</span></td><td>GPS 被欺骗、链路时断时续，平台切换惯性/视觉组合导航，按预记录路径返回集结点。</td><td>SR-15/02</td></tr>
+              <tr><td class="id">SC-06</td><td class="name">平民闯入与规避</td><td><span class="chip c-cons">异常</span></td><td>交战准备阶段，平民从侧门进入射击扇区，平台立即告警、锁定扇区、暂停授权请求，分队取消射击。</td><td>SR-16/17/18</td></tr>
+              <tr><td class="id">SC-07</td><td class="name">算法节点过热降级</td><td><span class="chip c-cons">异常</span></td><td>连续交战导致算力单元过热，平台自动切断武器控制权、转入纯遥控，只保留视频与标定功能。</td><td>SR-06/15</td></tr>
+              <tr><td class="id">SC-08</td><td class="name">战损被俘前自毁</td><td><span class="chip c-red">异常</span></td><td>平台翻覆受限、遭电磁劫持尝试，操作员触发敏感数据自毁，密钥模块物理擦除，随后回收残骸。</td><td>SR-15/20</td></tr>
+              <tr><td class="id">SC-09</td><td class="name">夜间静默抵近</td><td><span class="chip c-direct">正常</span></td><td>夜间纯电静音模式低速抵近观察点，红外成像标定目标，全程无主动辐射，噪声控制在 65 dB(A) 以内。</td><td>SR-19/04</td></tr>
+              <tr><td class="id">SC-10</td><td class="name">换电与再出动</td><td><span class="chip c-direct">正常</span></td><td>平台返至前沿换电点，2 人 3 min 内完成电池快换与自检，重新入网执行第二轮侦察。</td><td>SR-07/12</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 5-4　初步运行场景清单（ConOps 层）</div>
+      </div>
+
+      <h3 id="brs-5-8"><span class="n">5.8</span>假设、依赖与约束</h3>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">假设</div>
+          <div class="cd">
+            ・体系数据链与态势图标准在研制期内保持稳定；<br />
+            ・作战使用遵循现行 ROE，平台不承担规则制定；<br />
+            ・使用方具备前线换电与模块更换能力；<br />
+            ・可消耗定位成立（单机成本可承受战损）。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">关键依赖</div>
+          <div class="cd">
+            ・高精地图与目标特征库的可用性；<br />
+            ・边缘算力平台供货与国产替代；<br />
+            ・自组网电台性能（带宽、抗干扰）；<br />
+            ・算法模型在真实城镇场景的泛化能力。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chap" id="brs-6" data-vol="brs" data-group="brs" data-t="BRS-6 业务/任务需求 TR">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 6</span>
+        <div>
+          <h2>业务/任务需求（TR-01 ~ TR-12）</h2>
+          <span class="chap-sub">TASK REQUIREMENTS · 从任务层分解到系统能力的桥梁</span>
+        </div>
+      </div>
+
+      <p class="lead">
+        业务需求回答「为什么做」，任务需求回答「要做到什么才叫把任务完成了」。TR 处在业务需求与相关方需求之间：
+        它由任务层使命分解而来，向下被相关方需求与系统需求进一步细化。本项目的 12 条任务需求覆盖
+        <b>机动、感知、打击、通信、协同、生存、合规、保障、迭代、处置</b> 十个维度，构成能力谱系。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:76px">编号</th><th style="width:190px">任务需求名称</th><th>需求本质（一句话）</th><th style="width:82px">优先级</th><th style="width:120px">主责系统</th></tr></thead>
+            <tbody>
+              <tr><td class="id">TR-01</td><td class="name">复杂地形隐蔽抵近与快速突防</td><td>能跑得快、能过去、还得安静。</td><td><span class="chip c-red">最高</span></td><td>轮腿复合移动系统</td></tr>
+              <tr><td class="id">TR-02</td><td class="name">目标多维侦察与末端精准标定</td><td>看得清、认得准、标得精，且能直接用于打击。</td><td><span class="chip c-red">最高</span></td><td>感知与导航系统</td></tr>
+              <tr><td class="id">TR-03</td><td class="name">载荷快换与有限自主伴随打击</td><td>换得动、打得准、权限在人的手里。</td><td><span class="chip c-red">最高</span></td><td>载荷与武器管理</td></tr>
+              <tr><td class="id">TR-04</td><td class="name">通信拒止下的弹性网络中继</td><td>别人断网，它当基站。</td><td><span class="chip c-cons">高</span></td><td>指挥控制与通信</td></tr>
+              <tr><td class="id">TR-05</td><td class="name">体系互操作与即插即用接入</td><td>不改体系代码就能入网，听懂指挥。</td><td><span class="chip c-red">最高</span></td><td>指挥控制与通信</td></tr>
+              <tr><td class="id">TR-06</td><td class="name">人机混编协同与责任可追溯</td><td>人管得住机器，事后查得清。</td><td><span class="chip c-red">最高</span></td><td>协同接口</td></tr>
+              <tr><td class="id">TR-07</td><td class="name">跨域集群协同与冲突避让</td><td>不撞、不抢频谱、不重复打。</td><td><span class="chip c-cons">高</span></td><td>感知 / 通信</td></tr>
+              <tr><td class="id">TR-08</td><td class="name">高对抗环境下的抗毁与自保</td><td>被干扰能走、被盯上能藏、被捕获能毁。</td><td><span class="chip c-cons">高</span></td><td>通信 / 结构与防护</td></tr>
+              <tr><td class="id">TR-09</td><td class="name">交战规则合规与平民保护</td><td>不该打的，物理上也打不出去。</td><td><span class="chip c-red">最高</span></td><td>射击控制 / 识别</td></tr>
+              <tr><td class="id">TR-10</td><td class="name">模块化快修与高可用性保障</td><td>坏了能换、换得快、有工具也行，没工具也行。</td><td><span class="chip c-cons">高</span></td><td>结构 / 各子系统</td></tr>
+              <tr><td class="id">TR-11</td><td class="name">算法敏捷迭代与数据资产化</td><td>越用越聪明，不用返厂。</td><td><span class="chip c-cons">中高</span></td><td>任务计算</td></tr>
+              <tr><td class="id">TR-12</td><td class="name">绿色环保与敏感技术退役处置</td><td>退役不泄密、报废不污染。</td><td><span class="chip chip-plain">中</span></td><td>能源 / 结构</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-1　任务需求总表（逐条详述见下）</div>
+      </div>
+
+      <h3 id="brs-6-1"><span class="n">6.1</span>任务需求逐条说明</h3>
+
+      <details class="trd">
+        <summary><span class="tid">TR-01</span><b>复杂地形隐蔽抵近与快速突防</b><span class="tpri">最高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>平台需具备在铺装路面高速机动，并在城市废墟、楼梯、壕沟等非结构化地形中自主越障通行的能力，
+          全程支持纯电静音模式，以支持隐蔽侦察与穿插任务。</p>
+          <p><b>量化判据：</b>轮式最大速度 ≥ 10 km/h；足式越障高度 ≥ 0.25 m；可攀爬 ≤ 35° 斜坡与标准楼梯；跨越壕沟 ≥ 0.4 m；
+          轮足模式切换 ≤ 30 s；静音模式 10 m 处噪声 ≤ 65 dB(A)。</p>
+          <p><b>支撑关系：</b>支撑任务层「隐蔽抵近侦察」；满足一线班组（No.1）的快速投送诉求与自然环境（No.19）的低噪声约束。</p>
+          <p><b>架构落点：</b>轮腿复合移动系统 → 轮驱/转向、腿部摆动作动、悬架与减震子系统。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-02</span><b>目标多维侦察与末端精准标定</b><span class="tpri">最高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>搭载多光谱光电载荷，实现对敌方人员、车辆、工事的自动探测、识别与持续跟踪；
+          具备前端边缘计算能力，直接解算目标高精度坐标并生成打击引导数据。</p>
+          <p><b>量化判据：</b>1 km 内目标定位 CEP ≤ 5 m；激光指示偏移 ≤ 1 m @ 2 km；识别置信度 ≥ 0.9 才可作为「确认目标」上报，
+          低于阈值一律标注「疑似」；目标数据格式须符合体系报文标准。</p>
+          <p><b>支撑关系：</b>支撑任务层「目标精确定位与引导」；满足体系指挥网络（No.5）对杀伤链闭环的时效诉求。</p>
+          <p><b>架构落点：</b>智能感知与导航系统 → 目标探测与识别、定位与建图子系统；任务计算子系统。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-03</span><b>载荷快换与有限自主伴随打击</b><span class="tpri">最高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>采用标准化接口，支持侦察、轻武器、电子战等任务载荷的快速互换。在有人班组伴随作战时，
+          可在人工授权下（或特定规则下自主）对突发高价值目标实施短停射击或压制。</p>
+          <p><b>量化判据：</b>载荷更换 ≤ 10 min（2 人，无专用工具）；行进间射击平台姿态恢复 ≤ 1.5 s；
+          授权链路端到端时延 ≤ 500 ms；未授权时击发电路物理断开。</p>
+          <p><b>支撑关系：</b>支撑任务层「自主伴随打击」；满足武器供应商（No.10）接口标准化与有人战车乘员（No.4）的火力支援诉求。</p>
+          <p><b>架构落点：</b>作战载荷与武器管理系统 → 武器站伺服、射击控制与后坐管理、载荷快换接口。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-04</span><b>通信拒止环境下的弹性网络中继</b><span class="tpri">高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>当战场通信链路受阻或前线编队失联时，平台能充当移动的边缘通信节点，自主前出或占位，
+          建立自组网中继链路，恢复局部杀伤网的数据连通。</p>
+          <p><b>量化判据：</b>中继建立 ≤ 60 s；单跳覆盖 ≥ 3 km（视距）/ ≥ 500 m（建筑遮蔽）；同时中继 ≥ 2 路数据流。</p>
+          <p><b>支撑关系：</b>支撑任务层「体系节点中继」；满足体系指挥网络（No.5）与友军集群（No.3）的抗毁重构诉求。</p>
+          <p><b>架构落点：</b>指挥控制与通信系统 → 战术通信子系统、自组网电台模块。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-05</span><b>体系互操作与即插即用接入</b><span class="tpri">最高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>必须遵循全军通用的数据链协议与态势图标准。交付后，无需更改体系代码即可实现「即插即用」式入网，
+          接受体系任务式指挥（Mission Command）。</p>
+          <p><b>量化判据：</b>入网 ≤ 3 min；协议符合性测试零不符合项；报文丢包率 ≤ 1%；态势上报周期 ≤ 2 s。</p>
+          <p><b>支撑关系：</b>满足体系指挥网络（No.5）、采办鉴定局（No.13）的强合规性约束。</p>
+          <p><b>架构落点：</b>指挥控制与通信系统 → 体系数据链接口板、协同接口子系统。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-06</span><b>人机混编协同与责任可追溯</b><span class="tpri">最高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>支持与有人战车、步兵班组进行编组伴随。人机交互界面必须清晰展示自主决策逻辑；
+          在开火、高速机动等关键行动中，必须保留人类的干预接口与最终决定权，且全程数据记录（黑匣子）防篡改。</p>
+          <p><b>量化判据：</b>紧急接管响应 ≤ 300 ms，一级操作可达；决策依据可视化覆盖 100% 上报目标；
+          记录完整率 100%，防篡改校验通过；操作员上岗 ≤ 16 学时。</p>
+          <p><b>支撑关系：</b>满足一线班组（No.1）的易用性诉求，以及媒体与公众（No.20）、伦理委员会（No.16）的事后追责与监督要求。</p>
+          <p><b>架构落点：</b>协同接口子系统、有人终端交互平板模块、数据存储模块。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-07</span><b>跨域集群协同与冲突避让</b><span class="tpri">高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>能够与同编队的无人机蜂群、无人车进行空间与频谱的动态协调。具备基于优先级的立体防撞避让协议
+          和动态频谱多址接入能力，避免己方装备互扰。</p>
+          <p><b>量化判据：</b>编队内最小安全间距冲突率 = 0；频谱冲突检测 ≤ 1 s 并自动换频；目标重复分配率 ≤ 2%。</p>
+          <p><b>支撑关系：</b>满足友军无人集群（No.3）与频谱管理机构（No.14）的物理与电磁兼容诉求。</p>
+          <p><b>架构落点：</b>智能感知与导航系统（协同避障）、战术通信子系统（动态频谱）。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-08</span><b>高对抗环境下的抗毁与自保</b><span class="tpri">高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>具备在强电磁干扰、GPS 拒止环境下的惯性/视觉组合导航能力；具备低红外、低雷达截面积的隐身设计；
+          搭载硬件级防黑客加密模块，防劫持与数据泄露。</p>
+          <p><b>量化判据：</b>GPS 拒止 30 min 内定位漂移 ≤ 5 m；干扰环境下链路可用率 ≥ 70%；
+          防轻武器与破片等级满足任务剖面要求；劫持尝试检出 ≤ 2 s 并自动降级。</p>
+          <p><b>支撑关系：</b>应对敌方电子战单元（No.2）的威胁，满足网络安全保密部门（No.15）的防破译要求。</p>
+          <p><b>架构落点：</b>定位与建图子系统（组合导航）、结构与防护系统、任务计算（可信根）。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-09</span><b>交战规则合规与平民保护</b><span class="tpri">最高优先级 · 一票否决</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>火控系统必须内置「交战规则校验模块」。自主识别算法必须具备高置信度的「非战斗人员（平民/战俘/投降者）」识别与过滤能力，
+          必须具备「射击安全扇区」物理/软件锁死功能。</p>
+          <p><b>量化判据：</b>非战斗人员识别召回率 ≥ 95%，误判率 ≤ 2%；扇区校验失败时击发电路 100% 物理断开；
+          平民闯入告警时延 ≤ 1 s；投降姿态（举手/跪地/弃械）识别覆盖 ≥ 3 类。</p>
+          <p><b>支撑关系：</b>应对平民（No.17）、敌方伤员（No.18）被影响的后果，满足法规机构（No.14）与伦理委员会（No.16）的一票否决约束。</p>
+          <p><b>架构落点：</b>射击控制与后坐管理（授权校验）、目标探测与识别子系统、环境感知（近距人员探测）。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-10</span><b>模块化快修与高可用性保障</b><span class="tpri">高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>整机需按功能划分为可独立更换的模块（如腿部作动器、电池包、算力盒）。支持前线抢修分队在无复杂工具的情况下
+          进行模块级快拆快换，具备机内自检（BIT）与故障代码直报功能。</p>
+          <p><b>量化判据：</b>故障定位 ≤ 15 min；单模块更换 ≤ 10 min（2 人）；BIT 覆盖率 ≥ 90%；故障隔离到模块级（LRU）准确率 ≥ 95%。</p>
+          <p><b>支撑关系：</b>满足维修与抢修分队（No.12）的易修诉求，以及后勤能源系统（No.7）的快速补给要求。</p>
+          <p><b>架构落点：</b>结构与防护系统（模块化分区）、各子系统模块化设计、BIT 自检。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-11</span><b>算法敏捷迭代与数据资产化</b><span class="tpri">中高优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>具备远程 OTA 升级能力，允许后方算法提供方在不返厂的情况下更新目标识别模型与战术规控逻辑；
+          具备自动提取高价值「边缘数据（Corner Cases）」回传后方进行模型再训练的能力。</p>
+          <p><b>量化判据：</b>OTA 包大小与时间可控（≤ 30 min/次，不影响任务）；版本可回滚；Corner Case 自动标注准确率 ≥ 85%；
+          升级过程须审核留痕。</p>
+          <p><b>支撑关系：</b>满足算法与 AI 模型提供方（No.6）的持续迭代诉求，适应未来算法战的需要。</p>
+          <p><b>架构落点：</b>任务计算子系统（AI 推理计算卡、存储）、通信链路（OTA 通道）。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">TR-12</span><b>绿色环保与敏感技术退役处置</b><span class="tpri">中优先级</span></summary>
+        <div class="trd-body">
+          <p><b>需求陈述：</b>电池包、复合材料需具备环保标识，便于退役后回收；存储核心算法与密钥的模块必须具备「物理自毁」
+          或「一键擦除」功能，防止平台被遗弃或退役后泄密。</p>
+          <p><b>量化判据：</b>一键擦除 ≤ 5 s 且不可恢复（可验证）；自毁触发覆盖率 100%（含断电延时触发）；
+          电池与材料回收标识齐全率 100%。</p>
+          <p><b>支撑关系：</b>满足自然环境（No.19）的环保法规，以及采办局（No.13）对退役脱密审查的要求。</p>
+          <p><b>架构落点：</b>能源与热管理系统（电池回收）、结构（复合材料标识）、任务计算（密钥模块自毁）。</p>
+        </div>
+      </details>
+
+      <div class="note">
+        <span class="k">READING / 如何读这些 TR</span>
+        每条 TR 都包含四层信息：<b>需求陈述</b>（要什么）、<b>量化判据</b>（怎样算达到）、<b>支撑关系</b>（谁是提出者）、
+        <b>架构落点</b>（由谁实现）。第四层把问题域的词句接到了方案域的模块上，是后续 SyRS 与设计任务书的入口。
+      </div>
+    </section>
+
+    <section class="chap" id="brs-7" data-vol="brs" data-group="brs" data-t="BRS-7 其他生存周期概念">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 7</span>
+        <div>
+          <h2>其他初步生存周期概念</h2>
+          <span class="chap-sub">ACQUISITION · DEPLOYMENT · SUPPORT · DISPOSAL</span>
+        </div>
+      </div>
+      <p>除了运行概念，提案系统的采办、部署、支持与弃置概念同样需要在概念阶段给出初步描述，它们直接派生出保障类与约束类需求。</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct"><span class="tag">采办概念</span></div>
+          <div class="cd">
+            采用「总体单位牵头 + 分系统竞争择优 + 算法服务外包」的组合模式。合同类型建议为「研制合同 + 小批量试用 + 定型批产」三段式；
+            算法模型以版本服务方式持续交付，避免一次性买断导致无法迭代。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">部署概念</span></div>
+          <div class="cd">
+            随车运输至战术集结地域，或机降/吊运至前沿。展开流程为「出箱 → 装配 → 加电自检 → 入网 → 配属」，
+            目标 ≤ 15 min（2 人）。可前置预置于前沿补给点，按需唤醒。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">支持概念</span></div>
+          <div class="cd">
+            三级保障：分队级（换电、模块更换、BIT 判读）、旅团级（备件与修理）、基地级（大修与算法升级）。
+            关键在「前线只换不修」：所有前线动作均为模块级、无专用工具。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">弃置概念</span></div>
+          <div class="cd">
+            退役前完成脱密审查与数据销毁（含密钥模块物理自毁）；电池按危废回收；复合材料标识回收；
+            战损遗弃前须触发远程擦除，防止技术泄露。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chap" id="brs-8" data-vol="brs" data-group="brs" data-t="BRS-8 项目约束">
+      <div class="chap-head">
+        <span class="chap-no b">BRS · 8</span>
+        <div>
+          <h2>项目约束</h2>
+          <span class="chap-sub">PROJECT CONSTRAINTS</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:90px">编号</th><th style="width:150px">约束类型</th><th>内容</th></tr></thead>
+            <tbody>
+              <tr><td class="id">PC-01</td><td class="name">进度约束</td><td>概念阶段 → 方案设计 → 样机 → 试验鉴定 → 定型，各节点须锁定；算法成熟度不得成为关键路径瓶颈。</td></tr>
+              <tr><td class="id">PC-02</td><td class="name">成本约束</td><td>单机采购成本须落入可承受战损区间；全寿命费用（含保障与算法服务）须在批产规模下可负担。</td></tr>
+              <tr><td class="id">PC-03</td><td class="name">技术成熟度</td><td>轮腿执行机构、边缘算力、自组网电台须基于货架或近货架产品，避免关键件从零研制。</td></tr>
+              <tr><td class="id">PC-04</td><td class="name">体积重量</td><td>折叠运输态须满足运输箱与吊装限制；整机质量与外形满足空运/车运标准。</td></tr>
+              <tr><td class="id">PC-05</td><td class="name">法规与合规</td><td>符合国际人道法、交战规则、自主武器政策；通过伦理审查与保密审查。</td></tr>
+              <tr><td class="id">PC-06</td><td class="name">供应链与自主可控</td><td>关键件（伺服、减速器、激光雷达、AI 芯片）须有国产替代路径与双源保障。</td></tr>
+              <tr><td class="id">PC-07</td><td class="name">试验条件</td><td>须具备越障、室内 GPS 拒止、电磁对抗、靶场射击四类试验条件，否则验证无法闭环。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 8-1　项目约束</div>
+      </div>
+
+      <div class="note good">
+        <span class="k">BRS 完成判据</span>
+        业务需求规格说明在第 1~8 章齐备、20 类相关方与 12 条任务需求均可追溯到业务目的时，方视为达到
+        「相关方需要与需求定义过程」的启动条件；此时可转入第二卷 BtRS 与 OpsCon 的开发。
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- ================ 第 二 卷 · BtRS / StRS ================= -->
+    <!-- ========================================================= -->
+
+    <section class="chap" id="strs-1" data-vol="strs" data-group="strs" data-t="BtRS-1 简介与相关方">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 1</span>
+        <div>
+          <h2>简介与相关方</h2>
+          <span class="chap-sub">STAKEHOLDER REQUIREMENTS SPECIFICATION · SCOPE · STAKEHOLDER IDENTIFICATION &amp; ANALYSIS</span>
+        </div>
+      </div>
+
+      <h3 id="strs-1-1"><span class="n">1.1</span>相关方目的</h3>
+      <p class="lead">
+        BRS 回答了「组织为什么做这套装备」，本卷回答另一个问题：<b>在真实使用场景里，每一类相关方各自要什么、要多少、为什么这样要</b>。
+        本卷的读者是用户、操作者、维护者、采办方与开发团队，因此全部表述以「使用视角」为起点，以「可验证的需求条目」为终点。
+      </p>
+
+      <div class="note">
+        <span class="k">WHY THIS VOLUME MATTERS</span>
+        工程实践中的典型失败并不是「做不出来」，而是「做出来没人愿用、不能用、不敢用」。
+        其根源通常在概念阶段：<b>相关方没找全</b>（只考虑军方与最终用户）、<b>需要没分析</b>（把用户的方案当成需要）、
+        <b>需求不可验证</b>（写了「尽可能快」这类无法判定的表述）。本卷用「相关方—需要—需求—落点」四段式结构防止这三类问题。
+      </div>
+
+      <h3 id="strs-1-2"><span class="n">1.2</span>相关方范围</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:130px">要素</th><th>内容</th></tr></thead>
+            <tbody>
+              <tr><td class="name">目标系统 SoI</td><td>轮腿式无人作战平台整机（含六大功能系统、任务载荷接口与体系接入软件），不含弹药本体、上级指控系统与通信基础设施。</td></tr>
+              <tr><td class="name">使用背景</td><td>营连级分队在城镇、废墟、地下空间与复杂地形执行侦察、目标指示、伴随支援与通信中继任务；强电磁对抗、GNSS 拒止、人员混杂。</td></tr>
+              <tr><td class="name">生命周期阶段</td><td>概念、研制、试验、部署、使用、保障、退役全阶段；本卷不局限于「打起来」的那一段，因为保障与退役同样派生需求。</td></tr>
+              <tr><td class="name">范围内</td><td>相关方识别与分析、相关方需要、相关方需求、OpsCon 与运行场景、详细生存周期概念、验证准则（MOE/MOS）。</td></tr>
+              <tr><td class="name">范围外</td><td>系统架构与详细设计、具体选型与供应商、软件实现细节、合同与商务条款。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-1　相关方范围</div>
+      </div>
+
+      <h3 id="strs-1-3"><span class="n">1.3</span>概况</h3>
+      <p>
+        本卷的叙事顺序为：先识别相关方（1.5）→ 分析其优先级（1.6）→ 提炼需要（附录 A）→ 转化为需求（附录 B）
+        → 用 OpsCon 与运行场景把需求放回真实运行环境（第 6 章）→ 用追溯矩阵与验证准则证明「每条需要都被满足、每条需求都可验证」（附录 D/E）。
+      </p>
+      <div class="stats">
+        <div class="stat"><div class="v">20<small>类</small></div><div class="l">识别出的相关方</div></div>
+        <div class="stat"><div class="v">5<small>类</small></div><div class="l">交互要素（信号/数据/物质/能量/活动）</div></div>
+        <div class="stat"><div class="v">20<small>条</small></div><div class="l">相关方需要</div></div>
+        <div class="stat"><div class="v">20<small>条</small></div><div class="l">相关方需求 SR</div></div>
+        <div class="stat"><div class="v">10<small>个</small></div><div class="l">运行场景（含退化/异常）</div></div>
+      </div>
+
+      <h3 id="strs-1-4"><span class="n">1.4</span>定义</h3>
+      <p>术语与缩略语沿用 BRS 表 1-3，本卷补充以下专用术语：</p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">术语</th><th>释义</th></tr></thead>
+            <tbody>
+              <tr><td class="name">五类交互要素</td><td>信号、数据、物质、能量、活动。凡与目标系统在上述要素上发生交互的其他系统所有者，均为相关方（含使能系统与互操作系统）。</td></tr>
+              <tr><td class="name">直接 / 交互 / 约束 / 被影响</td><td>相关方的四类划分：直接从系统受益；在生命周期中与系统发生要素交互；对系统施加约束；承受系统带来的影响。</td></tr>
+              <tr><td class="name">利益点</td><td>相关方关注的诉求维度：体制与管理、资源、权利、约束。</td></tr>
+              <tr><td class="name">态度</td><td>相关方对项目的支持程度：+2 强烈支持、+1 支持、0 中立、−1 反对、−2 强烈反对。</td></tr>
+              <tr><td class="name">影响力 / 重要性</td><td>影响力：影响项目决策的能力（强/中/弱）；重要性：项目对其利益的影响程度（极高/高/中）。</td></tr>
+              <tr><td class="name">运行场景</td><td>单线程行为的描述；可用于派生功能、识别交互、定义确认测试程序。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-2　本卷补充术语</div>
+      </div>
+
+      <h3 id="strs-1-5"><span class="n">1.5</span>相关方（重点）</h3>
+
+      <h4><span class="n">1.5.1</span>识别方法：用五类交互要素扫一遍，避免漏人</h4>
+      <p>
+        相关方识别最怕「凭经验拍脑袋」。本卷采用两条互补的路径：先按<b>三大类</b>（直接受益、生命周期交互/使能、施加影响/被影响）粗分，
+        再对每个类别用<b>五类交互要素</b>（信号、数据、物质、能量、活动）逐项扫描——凡是与平台在这五类要素上有往来的实体所有者，
+        都算相关方。这样可以把容易被忽略的「频谱管理机构」「高精地图机构」「公众舆论」都扫出来。
+      </p>
+
+      <div class="grid g3">
+        <div class="card">
+          <div class="ct"><span class="tag">信号</span>感知与通信</div>
+          <div class="cd">射频、红外、声学、光学信号的收发与被动感知。相关方：友邻无人机、敌方电子战单元、频谱管理机构、卫星通信运营商。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">数据</span>解释与决策</div>
+          <div class="cd">态势、目标、指令、模型、日志。相关方：体系指控网络、算法提供方、高精地图机构、网络安全部门、媒体公众。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">物质</span>结构与转化</div>
+          <div class="cd">弹药、备件、电池、车体、被打击目标。相关方：弹药供应商、维修分队、投送部队、敌方目标、平民与民用物体。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">能量</span>动力与补给</div>
+          <div class="cd">电能、热能、后坐动能。相关方：换电站、能源系统、自然环境（热与噪声排放）。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">活动</span>行为与操作</div>
+          <div class="cd">操控、伴随、射击、维修、审查。相关方：一线班组、有人战车乘员、维修分队、试验鉴定局、伦理委员会。</div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">结论</span>扫描结果</div>
+          <div class="cd">共识别 20 类相关方，其中<b>直接 4 类</b>、<b>交互 8 类</b>、<b>约束 4 类</b>、<b>被影响 4 类</b>。若只用「客户 + 用户」两视角，将漏掉 14 类。</div>
+        </div>
+      </div>
+
+      <h4><span class="n">1.5.2</span>相关方清单（完整表）</h4>
+      <p>
+        下表按类别列出 20 类相关方，含交互要素、利益点（体制与管理 / 资源 / 权利 / 约束）、态度、影响力与重要性。
+        这张表是后续需求优先级排序的直接依据：<b>影响力强 + 重要性高的相关方，其需要优先进入需求集。</b>
+      </p>
+
+      <div class="filterbar" id="shFilter">
+        <button class="fbtn on" data-f="all">全部 20</button>
+        <button class="fbtn" data-f="直接">直接 4</button>
+        <button class="fbtn" data-f="交互">交互 8</button>
+        <button class="fbtn" data-f="约束">约束 4</button>
+        <button class="fbtn" data-f="被影响">被影响 4</button>
+        <input type="search" id="shSearch" placeholder="搜索相关方 / 交互要素…" />
+        <span class="cnt" id="shCount"></span>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl" id="shTable">
+            <thead><tr>
+              <th style="width:52px">编号</th><th style="width:60px">类别</th><th style="width:160px">相关方</th>
+              <th style="width:110px">交互要素</th><th style="width:150px">利益点：体制与管理</th><th style="width:150px">利益点：资源</th>
+              <th style="width:140px">利益点：权利</th><th style="width:150px">利益点：约束</th>
+              <th style="width:60px">态度</th><th style="width:64px">影响力</th><th style="width:64px">重要性</th>
+            </tr></thead>
+            <tbody id="shBody"></tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 1-3　相关方分析表示矩阵（态度：+2 强支持 … −2 强反对）</div>
+      </div>
+
+      <h4><span class="n">1.5.3</span>影响力—重要性四象限</h4>
+      <div class="fig">
+        <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="相关方影响力-重要性四象限图">
+          <defs>
+            <style>
+              .q-l{font:600 11px ui-monospace,Consolas,monospace;letter-spacing:.1em;fill:#56677b}
+              .q-n{font:700 10px ui-monospace,Consolas,monospace;fill:#dbe6f0}
+              .q-t{font:500 10px "Microsoft YaHei","PingFang SC",sans-serif;fill:#8b9cae}
+              .q-h{font:700 12px ui-monospace,Consolas,monospace;letter-spacing:.14em;fill:#22d3ee}
+            </style>
+          </defs>
+          <!-- 象限底 -->
+          <rect x="90" y="80" width="330" height="120" fill="rgba(251,191,36,.05)"/>
+          <rect x="420" y="80" width="330" height="120" fill="rgba(248,113,113,.06)"/>
+          <rect x="90" y="200" width="330" height="120" fill="rgba(255,255,255,.015)"/>
+          <rect x="420" y="200" width="330" height="120" fill="rgba(34,211,238,.05)"/>
+          <!-- 网格线 -->
+          <line x1="90" y1="200" x2="750" y2="200" stroke="rgba(140,180,210,.28)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="420" y1="80" x2="420" y2="320" stroke="rgba(140,180,210,.28)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="90" y1="320" x2="750" y2="320" stroke="rgba(140,180,210,.4)"/>
+          <line x1="90" y1="80" x2="90" y2="320" stroke="rgba(140,180,210,.4)"/>
+          <!-- 轴标签 -->
+          <text x="90" y="342" class="q-l">弱</text>
+          <text x="420" y="342" text-anchor="middle" class="q-l">中</text>
+          <text x="750" y="342" text-anchor="end" class="q-l">强</text>
+          <text x="420" y="366" text-anchor="middle" class="q-l">影响力 →</text>
+          <text x="74" y="86" text-anchor="end" class="q-l">极高</text>
+          <text x="74" y="204" text-anchor="end" class="q-l">高</text>
+          <text x="74" y="324" text-anchor="end" class="q-l">中</text>
+          <text x="20" y="180" class="q-l" transform="rotate(-90 20 180)">重要性 →</text>
+          <!-- 象限标题 -->
+          <text x="104" y="100" class="q-h" fill="#fbbf24">潜在关注</text>
+          <text x="734" y="100" text-anchor="end" class="q-h" fill="#f87171">关键管理</text>
+          <text x="104" y="314" class="q-h" fill="#56677b">边缘观察</text>
+          <text x="734" y="314" text-anchor="end" class="q-h">重点沟通</text>
+
+          <!-- 点位 -->
+          <g>
+            <circle cx="750" cy="96" r="5" fill="#f87171"/><text x="762" y="100" class="q-n">17</text><text x="762" y="114" class="q-t">平民/非战斗人员</text>
+            <circle cx="750" cy="158" r="4.5" fill="#22d3ee"/><text x="762" y="162" class="q-n">15</text><text x="762" y="176" class="q-t">网络安全保密</text>
+            <circle cx="750" cy="196" r="4.5" fill="#22d3ee"/><text x="762" y="200" class="q-n">5</text><text x="762" y="214" class="q-t">体系指控网络</text>
+            <circle cx="716" cy="238" r="4.5" fill="#4ade80"/><text x="704" y="242" text-anchor="end" class="q-n">1</text><text x="704" y="256" text-anchor="end" class="q-t">一线作战班组</text>
+            <circle cx="750" cy="266" r="4.5" fill="#f87171"/><text x="762" y="270" class="q-n">2</text><text x="762" y="284" class="q-t">敌方电子战</text>
+            <circle cx="750" cy="300" r="4.5" fill="#fbbf24"/><text x="762" y="304" class="q-n">13</text><text x="762" y="318" class="q-t">采办鉴定局</text>
+
+            <circle cx="388" cy="214" r="4.5" fill="#4ade80"/><text x="376" y="218" text-anchor="end" class="q-n">4</text><text x="376" y="232" text-anchor="end" class="q-t">有人战车乘员</text>
+            <circle cx="440" cy="232" r="4.5" fill="#22d3ee"/><text x="452" y="236" class="q-n">6</text><text x="452" y="250" class="q-t">算法/AI 提供方</text>
+            <circle cx="404" cy="252" r="4.5" fill="#4ade80"/><text x="392" y="256" text-anchor="end" class="q-n">3</text><text x="392" y="270" text-anchor="end" class="q-t">友军无人集群</text>
+            <circle cx="438" cy="274" r="4.5" fill="#fbbf24"/><text x="450" y="278" class="q-n">12</text><text x="450" y="292" class="q-t">维修抢修分队</text>
+            <circle cx="392" cy="292" r="4.5" fill="#a78bfa"/><text x="380" y="296" text-anchor="end" class="q-n">16</text><text x="380" y="310" text-anchor="end" class="q-t">伦理委员会</text>
+
+            <circle cx="118" cy="214" r="4.5" fill="#22d3ee"/><text x="130" y="218" class="q-n">9</text><text x="130" y="232" class="q-t">高精地图机构</text>
+            <circle cx="420" cy="308" r="4.5" fill="#fbbf24"/><text x="432" y="306" class="q-n">19</text><text x="432" y="292" class="q-t" opacity="0"> </text>
+
+            <circle cx="112" cy="330" r="4.5" fill="#22d3ee"/><text x="124" y="334" class="q-n">8</text><text x="124" y="348" class="q-t">卫通/数据链</text>
+            <circle cx="152" cy="360" r="4.5" fill="#22d3ee"/><text x="164" y="364" class="q-n">11</text><text x="164" y="378" class="q-t">投送部队</text>
+            <circle cx="252" cy="352" r="4.5" fill="#22d3ee"/><text x="264" y="356" class="q-n">7</text><text x="264" y="370" class="q-t">换电站</text>
+            <circle cx="330" cy="372" r="4.5" fill="#22d3ee"/><text x="342" y="376" class="q-n">10</text><text x="342" y="390" class="q-t">弹药供应商</text>
+            <circle cx="400" cy="340" r="4.5" fill="#fbbf24"/><text x="412" y="344" class="q-n">14</text><text x="412" y="358" class="q-t">频谱管理机构</text>
+            <circle cx="470" cy="372" r="4.5" fill="#a78bfa"/><text x="482" y="376" class="q-n">20</text><text x="482" y="390" class="q-t">媒体与公众</text>
+            <circle cx="120" cy="292" r="4.5" fill="#a78bfa"/><text x="132" y="296" class="q-n">18</text><text x="132" y="310" class="q-t">战俘/伤员</text>
+          </g>
+          <text x="420" y="34" text-anchor="middle" class="q-h">STAKEHOLDER MAP · 影响力 × 重要性</text>
+          <text x="420" y="52" text-anchor="middle" class="q-t">编号与表 1-3 一致；越靠右上，越需要优先响应并在需求集中显式体现</text>
+        </svg>
+        <div class="fig-cap"><b>图 1-1</b>　四象限：<b>关键管理</b>（强影响 + 高重要，如平民、体系指控、网安）决定合规与体系接入底线；<b>重点沟通</b>（中影响 + 高重要，如算法方、维修分队、伦理委员会）决定能力上限；<b>潜在关注</b>（弱影响 + 高重要，如高精地图机构）易被漏掉；<b>边缘观察</b>（弱影响 + 中重要）以标准接口应对即可。</div>
+      </div>
+
+      <h4><span class="n">1.5.4</span>三类经典分析的决定性结论</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">权利—利益分析</div>
+          <div class="cd">
+            <b>高权利 + 高利益</b>（一线班组、分队长、采办鉴定局）：必须让其参与需求确认与原型评审，否则需求必然返工。<br />
+            <b>高权利 + 低利益</b>（伦理委员会、频谱管理机构）：保持合规汇报节奏，避免「最后才发现不行」。<br />
+            <b>低权利 + 高利益</b>（维修分队、换电站、投送部队）：其约束虽不决定项目生死，却直接决定可用率，必须以需求条目承接。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">权利—动态性分析</div>
+          <div class="cd">
+            敌方电子战单元属于<b>高动态</b>相关方：其对抗手段会随我方装备列装而演进，因此对它的需求不能写成一次性指标，
+            而要写成「可升级的抗干扰策略 + OTA 可更新」这种留有余量的表述。</div>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <span class="k">PRIORITY CONFLICTS / 相关方诉求的正面冲突</span>
+        本项目存在三组硬冲突，必须在需求中显式裁决，而不能含糊处理：<br />
+        ① <b>可消耗性 vs 高生存性</b>：班组希望「便宜到敢丢」，使用方希望「打不掉」；裁决原则是分任务阶段——侦察阶段保生存，诱饵阶段认损失。<br />
+        ② <b>低特征 vs 高性能</b>：低红外/低噪声与高算力散热、大功率通信互相矛盾；裁决原则是分模式——静默模式降性能，交战模式放开。<br />
+        ③ <b>自主性 vs 合规性</b>：算法越自主越高效，但授权链要求人在回路；裁决原则是「自主止于识别与建议」。
+      </div>
+    </section>
+
+    <section class="chap" id="strs-2" data-vol="strs" data-group="strs" data-t="BtRS-2 参考文献">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 2</span>
+        <div>
+          <h2>参考文献</h2>
+          <span class="chap-sub">REFERENCES</span>
+        </div>
+      </div>
+      <p>引用文件与 BRS 表 2-1 一致，另补充以下与相关方需求直接相关的文件：</p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:250px">文件</th><th>用途</th></tr></thead>
+            <tbody>
+              <tr><td class="name">ISO/IEC/IEEE 29148:2018 第 9 章</td><td>StRS 文档轮廓与需求质量特性（必要性、无歧义、完整、单一、可行、可验证、可追溯）。</td></tr>
+              <tr><td class="name">INCOSE 手册「相关方需要与需求定义过程」</td><td>需要获取方法（访谈、问卷、场景、原型、研讨会等 17 种）与相关方分析矩阵。</td></tr>
+              <tr><td class="name">ANSI/AIAA G043A:2012</td><td>OCD 的章节结构与场景描述方法。</td></tr>
+              <tr><td class="name">郭宝柱《系统工程》第 4 章 4.2 节</td><td>相关方三大类划分、五类交互要素、起落架案例的「使命—阶段—情况—活动」推演。</td></tr>
+              <tr><td class="name">项目上卷《层级解构与体系协同》</td><td>系统/子系统/模块划分与指标基线，用于附录 D 的架构落点列。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 2-1　本卷补充引用</div>
+      </div>
+    </section>
+
+    <section class="chap" id="strs-3" data-vol="strs" data-group="strs" data-t="BtRS-3 业务管理需求">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 3</span>
+        <div>
+          <h2>业务管理需求</h2>
+          <span class="chap-sub">BUSINESS MANAGEMENT REQUIREMENTS（承自 BRS）</span>
+        </div>
+      </div>
+      <p>本卷不重复展开 BRS 的业务分析，仅将其中与相关方需求直接相关的业务管理需求条目化，作为需求集的上位约束。</p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:76px">编号</th><th style="width:170px">业务管理需求</th><th>内容</th><th style="width:120px">来源</th></tr></thead>
+            <tbody>
+              <tr><td class="id">BR-01</td><td class="name">使命与目标必须可度量</td><td>项目须以 MOE-01 ~ MOE-07 作为成功判据，而非仅以技术指标达标为验收条件。</td><td>BRS 3.2</td></tr>
+              <tr><td class="id">BR-02</td><td class="name">合规优先级最高</td><td>交战规则、平民保护与伦理审查结果具有一票否决效力，任何性能优化不得以此交换。</td><td>BRS 3.1 / 4.2</td></tr>
+              <tr><td class="id">BR-03</td><td class="name">可消耗性成立</td><td>单机成本须落入可承受战损区间，否则「诱饵」「首入」等战术用法不成立。</td><td>BRS 3.3</td></tr>
+              <tr><td class="id">BR-04</td><td class="name">体系协议符合性</td><td>必须遵循既定数据链与态势图标准，不得要求体系改造以适配本平台。</td><td>BRS 3.4</td></tr>
+              <tr><td class="id">BR-05</td><td class="name">质量特性达标</td><td>时效性、可用性、安全性、合规性、易用性、可保障性、可负担性、互操作性八项须有对应需求与验证方法。</td><td>BRS 4.4</td></tr>
+              <tr><td class="id">BR-06</td><td class="name">授权链不可绕过</td><td>开火授权链须端到端可验证，平台不得提供任何旁路或免除机制。</td><td>BRS 4.2 / 5.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 3-1　业务管理需求条目（上位约束）</div>
+      </div>
+    </section>
+
+    <section class="chap" id="strs-4" data-vol="strs" data-group="strs" data-t="BtRS-4 系统运行需求">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 4</span>
+        <div>
+          <h2>系统运行需求</h2>
+          <span class="chap-sub">SYSTEM OPERATIONAL REQUIREMENTS · PROCESSES · RULES · CONSTRAINTS · MODES &amp; STATES</span>
+        </div>
+      </div>
+
+      <h3 id="strs-4-1"><span class="n">4.1</span>系统过程</h3>
+      <p>系统过程是把业务过程（BP）转译为系统需要提供的运行流程，是功能需求的直接来源。每个系统过程对应一组系统功能与接口。</p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:76px">编号</th><th style="width:150px">系统过程</th><th style="width:190px">触发与入口</th><th>系统行为（做什么，不含怎么做）</th><th style="width:150px">对应业务过程</th></tr></thead>
+            <tbody>
+              <tr><td class="id">SP-01</td><td class="name">任务接收与确认</td><td>体系任务报文到达</td><td>解析任务包，校验完整性与签名，与自身状态（电量、弹药、健康）匹配后回执确认或提出不可执行理由。</td><td>BP-01</td></tr>
+              <tr><td class="id">SP-02</td><td class="name">自检与入网</td><td>加电 / 展开完成</td><td>执行 BIT，隔离故障，向体系注册、交换标识与能力声明，接收态势图增量。</td><td>BP-02</td></tr>
+              <tr><td class="id">SP-03</td><td class="name">自主机动</td><td>路径任务/操作指令</td><td>规划并可重规划路径，轮足模态按地形切换，避障并保持通信约束；向指控周期上报位置与状态。</td><td>BP-03</td></tr>
+              <tr><td class="id">SP-04</td><td class="name">感知与目标标定</td><td>到达侦察阵位/持续运行</td><td>多源融合构建局部地图；检测—分类—确认目标；解算坐标与置信度；生成标准格式目标报文。</td><td>BP-04</td></tr>
+              <tr><td class="id">SP-05</td><td class="name">授权与打击引导</td><td>操作员授权/火力请求</td><td>推送目标与决策依据；接收授权码；校验 ROE 与安全扇区；执行击发或输出引导数据；回报结果。</td><td>BP-05</td></tr>
+              <tr><td class="id">SP-06</td><td class="name">伴随与编队协同</td><td>编组建立</td><td>保持相对位置与队形，响应编队指令，交换协同态势，执行路权与优先级仲裁。</td><td>BP-06</td></tr>
+              <tr><td class="id">SP-07</td><td class="name">中继与链路管理</td><td>链路质量下降/失联告警</td><td>评估链路拓扑，机动至中继阵位，建立转发路由，动态换频与功率控制。</td><td>BP-07</td></tr>
+              <tr><td class="id">SP-08</td><td class="name">保障与撤收</td><td>低电量/低弹药/任务完成/故障</td><td>申请返航，按航线回撤，输出健康与任务日志，进入待机或维修流程。</td><td>BP-08</td></tr>
+              <tr><td class="id">SP-09</td><td class="name">训练模式</td><td>训练指令</td><td>模拟目标与故障，限制实弹，记录操作过程并生成考核评分。</td><td>BP-09</td></tr>
+              <tr><td class="id">SP-10</td><td class="name">退役与销毁</td><td>退役/被俘风险确认</td><td>执行数据擦除、密钥销毁、电池放电与回收标识输出，生成处置记录。</td><td>BP-10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-1　系统过程清单</div>
+      </div>
+
+      <h3 id="strs-4-2"><span class="n">4.2</span>系统运行策略与规则</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:86px">编号</th><th style="width:160px">规则</th><th>系统含义</th><th style="width:100px">违反后果</th></tr></thead>
+            <tbody>
+              <tr><td class="id">SR-R01</td><td class="name">授权优先于效率</td><td>任何路径规划、目标选择的优化，都不得绕过授权链；无法获得授权时系统只保持「观察—上报」。</td><td>击发被拒</td></tr>
+              <tr><td class="id">SR-R02</td><td class="name">失效安全（Fail-Safe）</td><td>任一环节失效（算力、通信、供电、伺服）时进入安全态：停机、锁定武器、保持静默。</td><td>系统锁定</td></tr>
+              <tr><td class="id">SR-R03</td><td class="name">人在回路可中断</td><td>操作员的紧急接管在任何自主等级下都有效，且优先于系统当前规划。</td><td>接管即时生效</td></tr>
+              <tr><td class="id">SR-R04</td><td class="name">识别不确定即降级</td><td>置信度不足时不生成「确认目标」，只生成「疑似目标」并提示人工复核。</td><td>目标降级</td></tr>
+              <tr><td class="id">SR-R05</td><td class="name">扇区与围栏双锁</td><td>射击安全扇区与地理围栏同时校验，任一不满足即断开击发电路（物理级）。</td><td>击发电路断开</td></tr>
+              <tr><td class="id">SR-R06</td><td class="name">失联自主不越界</td><td>链路中断后按预设策略（静默/返航/就近归队），不得自主进入未授权区域或自主交战。</td><td>进入安全态</td></tr>
+              <tr><td class="id">SR-R07</td><td class="name">能量优先保底</td><td>电量低于阈值时，按「定位 > 通信 > 机动 > 感知 > 打击」的顺序分配功率，保证可回收。</td><td>降级运行</td></tr>
+              <tr><td class="id">SR-R08</td><td class="name">记录先于动作</td><td>关键动作（授权、击发、模式切换、接管）执行前先写入日志，断电后仍可追溯。</td><td>动作被拒</td></tr>
+              <tr><td class="id">SR-R09</td><td class="name">升级需审核</td><td>OTA 更新须带签名与版本号，支持回滚；未经审核的模型不得加载。</td><td>更新被拒</td></tr>
+              <tr><td class="id">SR-R10</td><td class="name">数据最小化</td><td>仅采集与任务相关的数据，敏感数据加密存储，按权限访问。</td><td>访问被拒</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-2　系统运行策略与规则</div>
+      </div>
+
+      <h3 id="strs-4-3"><span class="n">4.3</span>系统运行约束</h3>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">SC-01 ~ SC-04　接口约束</div>
+          <div class="cd">
+            <b>SC-01</b> 数据链协议与报文格式按体系标准，不得私有扩展；<br />
+            <b>SC-02</b> 载荷接口机械/电气/数据三统一，支持盲插；<br />
+            <b>SC-03</b> 与有人终端交互须兼容现有班组终端硬件；<br />
+            <b>SC-04</b> 通信须在分配频段内工作，满足带外抑制要求。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">SC-05 ~ SC-08　环境与使用约束</div>
+          <div class="cd">
+            <b>SC-05</b> 工作温度 −20 ℃ ~ +45 ℃，防护等级满足雨雾烟尘；<br />
+            <b>SC-06</b> 折叠态满足运输箱与吊装限制，整机质量 ≤ 120 kg；<br />
+            <b>SC-07</b> 操作须能在佩戴防护装具、单手可操作条件下完成；<br />
+            <b>SC-08</b> 前线维护不得依赖专用工具与复杂标定。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">SC-09 ~ SC-12　法规与保障约束</div>
+          <div class="cd">
+            <b>SC-09</b> 符合国际人道法与 ROE，具备可审计记录；<br />
+            <b>SC-10</b> 涉密数据按等级管理，退役须脱密；<br />
+            <b>SC-11</b> 电池、复合材料须满足环保回收要求；<br />
+            <b>SC-12</b> 备件与模块须在保障体系内可获得，不依赖单一供应商。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">SC-13 ~ SC-15　时间与人力约束</div>
+          <div class="cd">
+            <b>SC-13</b> 展开 ≤ 15 min、入网 ≤ 3 min、换电 ≤ 3 min；<br />
+            <b>SC-14</b> 单机操作员需可同时监督 ≥ 2 台平台；<br />
+            <b>SC-15</b> 操作员上岗培训 ≤ 16 学时，维修技师 ≤ 40 学时。
+          </div>
+        </div>
+      </div>
+
+      <h3 id="strs-4-4"><span class="n">4.4</span>系统运行模式与状态</h3>
+      <p>
+        平台生命周期包含四个典型运行状态，并具备若干降级状态。状态之间的迁移条件是 OpsCon 的核心内容，
+        也是功能需求与安全需求的主要来源。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:120px">运行状态</th><th style="width:200px">系统做什么</th><th style="width:190px">关键配置</th><th>退出条件</th></tr></thead>
+            <tbody>
+              <tr><td class="name">S1 投送与部署态</td><td>折叠收纳、断电待命；展开后自检、入网、配属。</td><td>轮腿折叠、电池与武器站分离锁死、载荷锁定。</td><td>自检通过且入网 → S2</td></tr>
+              <tr><td class="name">S2 机动与感知态</td><td>轮式巡航或足式越障，SLAM 建图、避障、持续感知。</td><td>轮式：四轮驱动静音巡航；足式：髋/膝作动、悬架柔性、轮毂锁死作足端。</td><td>到达阵位且发现目标 → S3；低电量 → S4</td></tr>
+              <tr><td class="name">S3 交战与引导态</td><td>目标锁定、识别确认、坐标解算、授权请求、击发或引导。</td><td>足端锁定、悬架转刚性、武器站伺服就绪、保险解除待授权。</td><td>任务完成/弹药耗尽/威胁规避 → S2</td></tr>
+              <tr><td class="name">S4 保障与撤收态</td><td>返航、换电、模块更换、日志上传、故障隔离。</td><td>武器站锁死、载荷断电、数据回传通道打开。</td><td>再出动 → S2；退役 → S5</td></tr>
+              <tr><td class="name">S5 退役与处置态</td><td>数据擦除、密钥销毁、电池回收、脱密审查。</td><td>物理销毁通道启用、记录生成。</td><td>处置完成（终态）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 4-3　运行状态定义</div>
+      </div>
+
+      <div class="fig">
+        <svg viewBox="0 0 980 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="运行状态机与降级路径图">
+          <defs>
+            <style>
+              .st-t{font:600 13px "Microsoft YaHei","PingFang SC",sans-serif;fill:#eaf3fb}
+              .st-s{font:400 10px "Microsoft YaHei","PingFang SC",sans-serif;fill:#8b9cae}
+              .st-e{font:500 10px "Microsoft YaHei","PingFang SC",sans-serif;fill:#9fb2c4}
+              .st-m{font:700 9.5px ui-monospace,Consolas,monospace;letter-spacing:.1em;fill:#22d3ee}
+            </style>
+            <marker id="sa1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/>
+            </marker>
+            <marker id="sa2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/>
+            </marker>
+            <marker id="sa3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#f87171"/>
+            </marker>
+          </defs>
+
+          <rect x="30" y="60" width="180" height="74" rx="9" fill="rgba(255,255,255,.03)" stroke="rgba(140,180,210,.32)"/>
+          <text x="120" y="88" text-anchor="middle" class="st-t">S1 投送与部署</text>
+          <text x="120" y="108" text-anchor="middle" class="st-s">折叠 · 自检 · 入网</text>
+
+          <rect x="270" y="60" width="180" height="74" rx="9" fill="rgba(34,211,238,.07)" stroke="rgba(34,211,238,.45)"/>
+          <text x="360" y="88" text-anchor="middle" class="st-t">S2 机动与感知</text>
+          <text x="360" y="108" text-anchor="middle" class="st-s">轮式 / 足式 · SLAM</text>
+
+          <rect x="510" y="60" width="190" height="74" rx="9" fill="rgba(251,191,36,.07)" stroke="rgba(251,191,36,.45)"/>
+          <text x="605" y="88" text-anchor="middle" class="st-t">S3 交战与引导</text>
+          <text x="605" y="108" text-anchor="middle" class="st-s">锁定 · 授权 · 击发</text>
+
+          <rect x="760" y="60" width="190" height="74" rx="9" fill="rgba(74,222,128,.06)" stroke="rgba(74,222,128,.38)"/>
+          <text x="855" y="88" text-anchor="middle" class="st-t">S4 保障与撤收</text>
+          <text x="855" y="108" text-anchor="middle" class="st-s">返航 · 换电 · 日志</text>
+
+          <path d="M210,97 H266" stroke="#22d3ee" stroke-width="1.4" marker-end="url(#sa1)" fill="none"/>
+          <text x="238" y="88" text-anchor="middle" class="st-e">自检通过</text>
+          <path d="M450,97 H506" stroke="#22d3ee" stroke-width="1.4" marker-end="url(#sa1)" fill="none"/>
+          <text x="478" y="88" text-anchor="middle" class="st-e">到达阵位</text>
+          <path d="M700,97 H756" stroke="#22d3ee" stroke-width="1.4" marker-end="url(#sa1)" fill="none"/>
+          <text x="728" y="88" text-anchor="middle" class="st-e">完成/耗尽</text>
+          <path d="M855,134 V206 H360 V134" stroke="#4ade80" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#sa1)" fill="none"/>
+          <text x="600" y="200" class="st-e">再出动（换电/补弹完成）</text>
+
+          <!-- 降级态 -->
+          <rect x="180" y="252" width="200" height="64" rx="9" fill="rgba(139,156,174,.06)" stroke="rgba(140,180,210,.32)"/>
+          <text x="280" y="278" text-anchor="middle" class="st-t">D1 纯遥控降级</text>
+          <text x="280" y="296" text-anchor="middle" class="st-s">算力/感知失效 · 仅视频与机动</text>
+
+          <rect x="400" y="252" width="200" height="64" rx="9" fill="rgba(139,156,174,.06)" stroke="rgba(140,180,210,.32)"/>
+          <text x="500" y="278" text-anchor="middle" class="st-t">D2 自主静默</text>
+          <text x="500" y="296" text-anchor="middle" class="st-s">链路中断 · 隐蔽待机</text>
+
+          <rect x="620" y="252" width="200" height="64" rx="9" fill="rgba(248,113,113,.07)" stroke="rgba(248,113,113,.4)"/>
+          <text x="720" y="278" text-anchor="middle" class="st-t">D3 安全锁定</text>
+          <text x="720" y="296" text-anchor="middle" class="st-s">违规/劫持 · 武器锁死停机</text>
+
+          <rect x="180" y="350" width="200" height="56" rx="9" fill="rgba(255,255,255,.02)" stroke="rgba(140,180,210,.26)"/>
+          <text x="280" y="374" text-anchor="middle" class="st-t">D4 失联返航</text>
+          <text x="280" y="392" text-anchor="middle" class="st-s">超时按预记录路径返回</text>
+
+          <path d="M330,134 V216 H280 V248" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sa2)" fill="none"/>
+          <path d="M400,134 V236 H500 V248" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sa2)" fill="none"/>
+          <path d="M605,134 V216 H720 V248" stroke="#f87171" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sa3)" fill="none"/>
+          <path d="M280,316 V346" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sa2)" fill="none"/>
+          <text x="300" y="340" class="st-e">超时未恢复</text>
+
+          <rect x="30" y="266" width="130" height="46" rx="7" fill="rgba(255,255,255,.02)" stroke="rgba(140,180,210,.2)"/>
+          <text x="95" y="286" text-anchor="middle" class="st-m">DEGRADE</text>
+          <text x="95" y="302" text-anchor="middle" class="st-s">降级路径</text>
+          <text x="95" y="352" text-anchor="middle" class="st-e">原则：先保定位、</text>
+          <text x="95" y="368" text-anchor="middle" class="st-e">再保通信、最后</text>
+          <text x="95" y="384" text-anchor="middle" class="st-e">放弃打击能力</text>
+        </svg>
+        <div class="fig-cap"><b>图 4-1</b>　四个正常运行状态（S1–S4）与四条降级路径（D1–D4）。降级原则：<b>定位 &gt; 通信 &gt; 机动 &gt; 感知 &gt; 打击</b>，任何时候都保留「可被找回」的能力。</div>
+      </div>
+
+      <div class="note rule">
+        <span class="k">STATE INVARIANT / 跨状态不变式</span>
+        无论处于哪个状态，以下四条恒成立：①无授权不得击发；②记录持续写入；③紧急接管随时有效；
+        ④违反合规条件即进入 D3 安全锁定。这些不变式在任意状态迁移中都不得被「优化掉」。
+      </div>
+    </section>
+
+    <section class="chap" id="strs-5" data-vol="strs" data-group="strs" data-t="BtRS-5 用户需求">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 5</span>
+        <div>
+          <h2>用户需求</h2>
+          <span class="chap-sub">USER REQUIREMENTS · 按角色分组的「用起来怎么样」</span>
+        </div>
+      </div>
+
+      <p class="lead">
+        相关方需求（附录 B）描述「各相关方要什么」，用户需求描述「不同角色的人在实际使用中要感受到什么」。
+        二者互补：前者是需求集，后者是可用性与人因的落点。以下 16 条按角色分组，每条都给出理由与验证方法，
+        以便在试验与试用阶段直接判定。
+      </p>
+
+      <h4><span class="n">5.1</span>分队长 / 开火授权人</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th>用户需求陈述</th><th style="width:220px">理由</th><th style="width:150px">验证方法</th></tr></thead>
+            <tbody>
+              <tr><td class="id">UR-01</td><td>我必须在 3 秒内看懂「目标是什么、置信度多少、有没有平民、能否打」，而不是先看五分钟视频。</td><td>战斗中判断窗口只有数秒；信息组织方式决定决策速度。</td><td>可用性测试 + 任务时间统计</td></tr>
+              <tr><td class="id">UR-02</td><td>开火授权必须是一个明确、不可误触的动作，且我能随时撤销。</td><td>授权即责任，误触代价不可接受。</td><td>故障注入 / 误操作演练</td></tr>
+              <tr><td class="id">UR-03</td><td>任何时刻我都能一键让它停下或退回，不管它当时有多「自主」。</td><td>战场态势瞬变，人类必须保留否决权。</td><td>接管响应测试（≤ 300 ms）</td></tr>
+              <tr><td class="id">UR-04</td><td>任务结束后我要能调出完整记录，证明每一次打击都合规。</td><td>事后审查与责任追溯是硬性要求。</td><td>记录抽查与完整性校验</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4><span class="n">5.2</span>平台操作员</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th>用户需求陈述</th><th style="width:220px">理由</th><th style="width:150px">验证方法</th></tr></thead>
+            <tbody>
+              <tr><td class="id">UR-05</td><td>我要能同时监督 2 台以上平台，而不是被一台占满双手和眼睛。</td><td>编成中平台数量为 2~4 台，人力有限。</td><td>多机监督任务负荷测试</td></tr>
+              <tr><td class="id">UR-06</td><td>它卡住时我要知道为什么卡住，而不是只看到「故障」两个字。</td><td>快速处置依赖明确的故障定位。</td><td>BIT 故障注入测试</td></tr>
+              <tr><td class="id">UR-07</td><td>轮足切换我能手动强制，也能让它自己判断；两者都要可靠。</td><td>地形误判时人工经验优于算法。</td><td>切换成功率与耗时测试</td></tr>
+              <tr><td class="id">UR-08</td><td>链路差的时候，我要能预判它会不会失联、失联后它会怎么走。</td><td>失联行为可预期，才能放心前出。</td><td>链路衰减试验</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4><span class="n">5.3</span>步兵班长 / 伴随分队</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th>用户需求陈述</th><th style="width:220px">理由</th><th style="width:150px">验证方法</th></tr></thead>
+            <tbody>
+              <tr><td class="id">UR-09</td><td>它跟得上我们，也别挡我们的路、别在身后突然加速。</td><td>伴随编队中，运动特性不匹配会造成危险。</td><td>伴随行军试验（跟车误差）</td></tr>
+              <tr><td class="id">UR-10</td><td>它轰隆隆开过来会暴露我们，静音要真静音。</td><td>隐蔽是班组生存的前提。</td><td>噪声与红外特征实测</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4><span class="n">5.4</span>维修技师 / 保障与投送人员</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th>用户需求陈述</th><th style="width:220px">理由</th><th style="width:150px">验证方法</th></tr></thead>
+            <tbody>
+              <tr><td class="id">UR-11</td><td>坏了我要能徒手换模块，别让我找专用工具和标定台。</td><td>前线条件有限，工具依赖会拖垮出动率。</td><td>暗室/野外换件演练</td></tr>
+              <tr><td class="id">UR-12</td><td>换完模块它要能自己认出换了什么，别让我重刷程序。</td><td>减少人为差错与时间消耗。</td><td>换件后自检与配置识别测试</td></tr>
+              <tr><td class="id">UR-13</td><td>两个人抬得动、塞得进车、吊得上直升机。</td><td>投送能力决定它能不能到战场。</td><td>运输适配性试验</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4><span class="n">5.5</span>指挥 / 情报 / 试验训练人员</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">编号</th><th>用户需求陈述</th><th style="width:220px">理由</th><th style="width:150px">验证方法</th></tr></thead>
+            <tbody>
+              <tr><td class="id">UR-14</td><td>它上报的目标必须能直接进态势图，不要让我再手工转一遍坐标。</td><td>人工转抄是时效与误差的主要来源。</td><td>端到端报文符合性测试</td></tr>
+              <tr><td class="id">UR-15</td><td>它标定的目标，火炮打得中；打了之后它得告诉我命中没有。</td><td>引导的价值在于命中与评估闭环。</td><td>实弹引导与毁伤评估试验</td></tr>
+              <tr><td class="id">UR-16</td><td>我要能在训练模式里模拟故障和复杂场景，而不消耗实弹。</td><td>能力形成依赖高频训练，成本必须可控。</td><td>训练模式功能验证</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="k">USER REQUIREMENT → STAKEHOLDER REQUIREMENT</span>
+        用户需求是「体验层」的表达，需在附录 B 中映射到可验证的相关方需求（SR）。
+        例如 UR-05（多机监督）→ SR-01（一键接管与简化交互）；UR-10（真静音）→ SR-19（纯电驱动与声学特征）。
+        映射关系见附录 D 追溯矩阵。
+      </div>
+    </section>
+
+    <section class="chap" id="strs-6" data-vol="strs" data-group="strs" data-t="BtRS-6 详细生存周期概念 OpsCon">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 6</span>
+        <div>
+          <h2>详细生存周期概念（OpsCon）</h2>
+          <span class="chap-sub">OPERATIONAL CONCEPT · 系统做什么与为什么 · 一对多视角</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="k">本章定位 / SYSTEM LAYER</span>
+        与 BRS 第 5 章（组织层、多对多）不同，本章是<b>系统层</b>的 OpsCon：以轮腿式平台为核心，描述它在一对多的交互中
+        「做什么、为什么这样做、在什么情况下不这样做」。OCD 不是需求文档，但它必须能<b>派生</b>需求——
+        本章每一条运行活动，都能在附录 B 找到对应的 SR 条目。
+      </div>
+
+      <h3 id="strs-6-1"><span class="n">6.1</span>运行概念（OpsCon）</h3>
+
+      <h4><span class="n">6.1.1</span>系统使命任务分解</h4>
+      <p>从 BRS 第 6 章的任务需求出发，平台承担的使命任务可分解为六项。这六项是运行阶段划分的依据，也是「为什么要有这些状态」的答案。</p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:70px">编号</th><th style="width:170px">使命任务</th><th>内容（做什么，不含怎么做）</th><th style="width:110px">主要阶段</th><th style="width:90px">对应 TR</th></tr></thead>
+            <tbody>
+              <tr><td class="id">MT-1</td><td class="name">进入战场空间</td><td>从运输态展开，自主或受控穿过道路、废墟、楼梯、门洞，抵达指定区域并保持可通信。</td><td>S1 / S2</td><td>TR-01</td></tr>
+              <tr><td class="id">MT-2</td><td class="name">发现与识别</td><td>在可见光/红外/深度多源数据中探测人员、车辆、工事与设施，给出类型、位置与置信度。</td><td>S2</td><td>TR-02</td></tr>
+              <tr><td class="id">MT-3</td><td class="name">标定与引导</td><td>解算高精度坐标，生成符合体系格式的打击引导数据，持续跟踪并修正。</td><td>S2 / S3</td><td>TR-02 / TR-05</td></tr>
+              <tr><td class="id">MT-4</td><td class="name">受限打击</td><td>在人类授权下对授权目标实施短停射击或压制，射击后快速恢复姿态。</td><td>S3</td><td>TR-03 / TR-09</td></tr>
+              <tr><td class="id">MT-5</td><td class="name">维系网络</td><td>在链路受阻时充当移动中继，恢复局部数据连通，或作为体系边缘节点转发态势。</td><td>S2 / S4</td><td>TR-04 / TR-05</td></tr>
+              <tr><td class="id">MT-6</td><td class="name">保全与回收</td><td>能量或弹药不足、故障或失联时，自主回到可回收位置，保全数据并最小化损失。</td><td>S4</td><td>TR-08 / TR-10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-1　使命任务分解</div>
+      </div>
+
+      <h4><span class="n">6.1.2</span>运行阶段与阶段情况</h4>
+      <p>
+        借鉴起落架案例的推演方法：先列运行阶段，再对每个阶段列「可能出现的情况」（正常与异常），
+        然后对每种情况分解一层活动。<b>异常情况的来源不只包括系统失效，还包括环境威胁与人为因素。</b>
+      </p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:110px">运行阶段</th><th style="width:240px">正常情况</th><th>非正常/异常情况（须有应对）</th></tr></thead>
+            <tbody>
+              <tr><td class="name">P1 投送与展开</td><td>随车/机降抵达，2 人展开、加电、自检通过、入网成功</td><td>装配错位、电池低温失效、自检报错、入网被拒（协议版本不符）、运输中损伤</td></tr>
+              <tr><td class="name">P2 机动与渗透</td><td>轮式巡航 → 遇到楼梯/废墟切换足式 → 抵达阵位</td><td>地形误判导致陷落、楼梯塌陷、足端打滑、GNSS 拒止、链路中断、被动探测暴露</td></tr>
+              <tr><td class="name">P3 侦察与识别</td><td>多源融合建图，识别目标并上报坐标与置信度</td><td>强逆光/烟尘导致成像退化、玻璃镜面误检、目标被遮挡、平民与战斗员混杂、算力过热降频</td></tr>
+              <tr><td class="name">P4 交战与引导</td><td>锁定 → 授权 → 击发/引导 → 姿态恢复 → 毁伤评估</td><td>授权超时、扇区内出现友军/平民、后坐导致姿态失稳、卡弹、敌方反击、链路中断于授权过程中</td></tr>
+              <tr><td class="name">P5 中继与协同</td><td>机动至中继位，建立路由，恢复连通</td><td>中继位暴露、频谱被压制、中继过载、与无人机频段冲突</td></tr>
+              <tr><td class="name">P6 保障与撤收</td><td>返航、换电、补弹、日志上传、再出动</td><td>返航路径被切断、电量耗尽、无法回收（须自毁）、备件缺失</td></tr>
+              <tr><td class="name">P7 退役与处置</td><td>脱密、擦除、电池回收、记录归档</td><td>擦除失败、残骸落入敌手、数据残留</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-2　运行阶段与正常/异常情况</div>
+      </div>
+
+      <h4><span class="n">6.1.3</span>四态运行流程（六要素定义）</h4>
+      <p>对每个状态，从<b>参与者、输入输出、运行政策约束、物理环境、互操作系统、社会因素</b>六个方面定义活动。</p>
+
+      <div class="grid g2">
+        <div class="card hl">
+          <div class="ct"><span class="tag">S1</span>投送与部署态</div>
+          <div class="cd">
+            <b>参与者</b>：投送部队、保障分队、操作员。<br />
+            <b>输入/输出</b>：运输箱与配套 → 展开就绪、入网确认、自检报告。<br />
+            <b>政策约束</b>：武器站分离锁死；展开须在掩蔽条件下完成；自检未过不得入网。<br />
+            <b>物理环境</b>：车载/机降地域、低温或雨雪、沙尘。<br />
+            <b>互操作系统</b>：运输车辆、吊装设备、充电/换电点、体系网络。<br />
+            <b>社会因素</b>：前沿人员暴露风险；展开噪声与灯光可能暴露阵地。
+          </div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">S2</span>机动与感知态</div>
+          <div class="cd">
+            <b>参与者</b>：平台、操作员、分队长、友邻无人机。<br />
+            <b>输入/输出</b>：路径点/任务区 → 位置更新、局部地图、目标报文。<br />
+            <b>政策约束</b>：静默优先；不得进入未授权区域；路权服从编队仲裁。<br />
+            <b>物理环境</b>：铺装路、废墟、楼梯、室内、雨雾烟尘、夜间。<br />
+            <b>互操作系统</b>：无人机（俯视）、无人车（地面）、班组终端、自组网。<br />
+            <b>社会因素</b>：平民活动区域须降速或绕行；噪声与红外特征影响居民感知。
+          </div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">S3</span>交战与引导态</div>
+          <div class="cd">
+            <b>参与者</b>：平台、授权人、火力单元、指挥节点。<br />
+            <b>输入/输出</b>：目标框与决策依据 → 授权码 → 击发/引导数据 → 毁伤评估。<br />
+            <b>政策约束</b>：ROE 校验、扇区与围栏双锁、记录先于动作、识别不确定即降级。<br />
+            <b>物理环境</b>：射击后坐、狭小空间回波、烟尘遮挡、强电磁干扰。<br />
+            <b>互操作系统</b>：武器站与弹药、火控/授权终端、火力单元、无人机（校射）。<br />
+            <b>社会因素</b>：平民在场、民用设施邻近、舆论与法律审查压力。
+          </div>
+        </div>
+        <div class="card hl">
+          <div class="ct"><span class="tag">S4</span>保障与撤收态</div>
+          <div class="cd">
+            <b>参与者</b>：平台、保障分队、维修技师、算法工程师（远程）。<br />
+            <b>输入/输出</b>：返航申请/故障代码 → 换电、换模块、日志与 Corner Case 回传。<br />
+            <b>政策约束</b>：武器站锁死、载荷断电后再维护；数据回传须加密。<br />
+            <b>物理环境</b>：前沿换电点、野外维修条件、时间压力。<br />
+            <b>互操作系统</b>：换电站、备件系统、训练/演练系统、后方算法平台。<br />
+            <b>社会因素</b>：保障人员技能水平差异；战时人力紧张。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">6.1.4</span>核心业务运行流程：一次「侦察—打击」</h4>
+      <p>以最常见的一次交战为例，给出从探测到记录的完整运行流程。每一步都标注「谁在做什么」与「系统保证什么」。</p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:56px">步骤</th><th style="width:150px">环节</th><th>运行描述</th><th style="width:190px">系统保证</th><th style="width:110px">时延预算</th></tr></thead>
+            <tbody>
+              <tr><td class="id">STEP 1</td><td class="name">感知</td><td>双光相机捕获图像，边缘算力提取特征，输出「持械人员 / 车辆 / 工事」候选框与置信度。</td><td>多源融合、置信度门限、疑似标注</td><td>≤ 500 ms/帧</td></tr>
+              <tr><td class="id">STEP 2</td><td class="name">定位与稳定</td><td>解算目标坐标；足端锁定、悬架转刚性；武器站两轴伺服完成瞄准线稳定与弹道解算。</td><td>CEP ≤ 5 m；姿态恢复 ≤ 1.5 s</td><td>≤ 2 s</td></tr>
+              <tr><td class="id">STEP 3</td><td class="name">交互与授权</td><td>图像、目标框、置信度、平民告警、附带损伤预估推送至分队长终端；分队长确认非平民且符合 ROE，按下授权。</td><td>决策依据完整、授权码不可伪造、可撤销</td><td>≤ 30 s（人工）</td></tr>
+              <tr><td class="id">STEP 4</td><td class="name">校验</td><td>火控校验 ROE 条款、射击安全扇区、地理围栏、友军位置；任一不满足则物理断开击发电路。</td><td>双锁机制、失败原因记录</td><td>≤ 200 ms</td></tr>
+              <tr><td class="id">STEP 5</td><td class="name">执行与反馈</td><td>接收击发指令，后坐缓冲启动，射击，姿态恢复；同步上报射击结果。</td><td>后坐管理、姿态快速恢复、结果回报</td><td>≤ 3 s</td></tr>
+              <tr><td class="id">STEP 6</td><td class="name">评估与记录</td><td>持续观察目标区域，回报命中/未命中/需补射；全程音视频与操作日志写入黑匣子。</td><td>毁伤评估、记录完整率 100%、防篡改</td><td>≤ 60 s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-3　侦察—打击运行流程（端到端 ≤ 90 s，对应 MOE-03）</div>
+      </div>
+
+      <h4><span class="n">6.1.5</span>人机协同与自主降级机制</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">模式</th><th style="width:180px">触发条件</th><th>系统行为</th><th style="width:150px">人的角色</th></tr></thead>
+            <tbody>
+              <tr><td class="name">M0 遥控模式</td><td>操作员主动选择 / 自主能力失效</td><td>逐指令执行，仅提供稳定与安全保护；感知数据照常回传。</td><td>全程操控</td></tr>
+              <tr><td class="name">M1 监督控制（正常交战）</td><td>链路正常、算力正常</td><td>自主感知、识别、路径规划、站位选择；授权与击发由人决定。</td><td>确认 AI 推送的目标并授权</td></tr>
+              <tr><td class="name">M2 半自主</td><td>链路质量中等 / 任务复杂度高</td><td>按指定路径与区域自主搜索，目标标定后上报等待指令；不主动交战。</td><td>设定任务、监督执行</td></tr>
+              <tr><td class="name">M3 自主降级（通信拒止）</td><td>链路中断超阈值</td><td>自主规划路径、搜索目标，但只能「标定与上报」，不能发射；按策略静默或返航。</td><td>恢复链路后审阅</td></tr>
+              <tr><td class="name">D1 纯遥控降级</td><td>算力节点过热/宕机</td><td>自动切断武器控制权，转入纯遥控，仅保留视频与机动。</td><td>手动操控撤离</td></tr>
+              <tr><td class="name">D3 安全锁定</td><td>违规、劫持尝试、围栏越界</td><td>武器锁死、停机、静默，等待人工处置。</td><td>现场处置/回收</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-4　人机协同模式与降级机制</div>
+      </div>
+
+      <h4><span class="n">6.1.6</span>运行约束与边界</h4>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">能耗运行约束</div>
+          <div class="cd">
+            足式攀爬时电机峰值功耗大，BMS 优先保障动力电，适当降低非核心传感器（如声学定位）的刷新率；
+            低电量阈值触发「保底分配」：定位 &gt; 通信 &gt; 机动 &gt; 感知 &gt; 打击。静默模式下主动探测关闭。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">安全运行约束</div>
+          <div class="cd">
+            开火瞬间须通过地理围栏（Geofencing）与射击安全扇区双重校验，确认自身及射击扇区内无友军；
+            否则击发电路物理断开。近距离人员闯入时执行「绝对防御」：避让、停机、退回，严禁开火。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">通信运行约束</div>
+          <div class="cd">
+            双链路冗余（自组网 + 卫通/蜂窝备份），按链路质量自动切换；失联后先静默、再返航；
+            中继模式下须评估阵位暴露风险，避免长期驻留高价值位置。
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">人因运行约束</div>
+          <div class="cd">
+            单机操作员可同时监督 ≥ 2 台；紧急接管一级可达；界面须展示「为什么这么判断」，
+            避免操作员盲信算法；关键动作需二次确认，防止误触。
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="n">6.1.7</span>任务剖面</h4>
+      <div class="fig">
+        <svg viewBox="0 0 980 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="任务剖面时间线图">
+          <defs>
+            <style>
+              .m-l{font:600 11.5px "Microsoft YaHei","PingFang SC",sans-serif;fill:#eaf3fb}
+              .m-s{font:400 9.5px "Microsoft YaHei","PingFang SC",sans-serif;fill:#8b9cae}
+              .m-x{font:400 9.5px ui-monospace,Consolas,monospace;fill:#56677b}
+            </style>
+          </defs>
+          <line x1="40" y1="150" x2="940" y2="150" stroke="rgba(140,180,210,.22)" stroke-width="1"/>
+          <!-- 阶段块 -->
+          <rect x="40" y="118" width="120" height="64" rx="7" fill="rgba(139,156,174,.10)" stroke="rgba(140,180,210,.32)"/>
+          <text x="100" y="142" text-anchor="middle" class="m-l">投送展开</text>
+          <text x="100" y="160" text-anchor="middle" class="m-s">≤ 15 min</text>
+          <text x="100" y="174" text-anchor="middle" class="m-s">2 人</text>
+
+          <rect x="170" y="118" width="150" height="64" rx="7" fill="rgba(34,211,238,.09)" stroke="rgba(34,211,238,.42)"/>
+          <text x="245" y="142" text-anchor="middle" class="m-l">轮式机动</text>
+          <text x="245" y="160" text-anchor="middle" class="m-s">≥ 10 km/h</text>
+          <text x="245" y="174" text-anchor="middle" class="m-s">静音巡航</text>
+
+          <rect x="330" y="118" width="150" height="64" rx="7" fill="rgba(34,211,238,.09)" stroke="rgba(34,211,238,.42)"/>
+          <text x="405" y="142" text-anchor="middle" class="m-l">足式越障</text>
+          <text x="405" y="160" text-anchor="middle" class="m-s">≥ 0.25 m / ≤ 35°</text>
+          <text x="405" y="174" text-anchor="middle" class="m-s">切换 ≤ 30 s</text>
+
+          <rect x="490" y="118" width="160" height="64" rx="7" fill="rgba(251,191,36,.10)" stroke="rgba(251,191,36,.42)"/>
+          <text x="570" y="142" text-anchor="middle" class="m-l">侦察与标定</text>
+          <text x="570" y="160" text-anchor="middle" class="m-s">CEP ≤ 5 m</text>
+          <text x="570" y="174" text-anchor="middle" class="m-s">持续上报</text>
+
+          <rect x="660" y="118" width="150" height="64" rx="7" fill="rgba(248,113,113,.10)" stroke="rgba(248,113,113,.42)"/>
+          <text x="735" y="142" text-anchor="middle" class="m-l">交战/引导</text>
+          <text x="735" y="160" text-anchor="middle" class="m-s">闭环 ≤ 90 s</text>
+          <text x="735" y="174" text-anchor="middle" class="m-s">授权后可撤销</text>
+
+          <rect x="820" y="118" width="120" height="64" rx="7" fill="rgba(74,222,128,.10)" stroke="rgba(74,222,128,.4)"/>
+          <text x="880" y="142" text-anchor="middle" class="m-l">撤收保障</text>
+          <text x="880" y="160" text-anchor="middle" class="m-s">换电 ≤ 3 min</text>
+          <text x="880" y="174" text-anchor="middle" class="m-s">日志上传</text>
+
+          <!-- 关键事件标记 -->
+          <g fill="#22d3ee">
+            <circle cx="170" cy="150" r="3.5"/><circle cx="330" cy="150" r="3.5"/>
+            <circle cx="490" cy="150" r="3.5"/><circle cx="660" cy="150" r="3.5"/><circle cx="820" cy="150" r="3.5"/>
+          </g>
+          <text x="170" y="100" text-anchor="middle" class="m-x">入网 ≤3 min</text>
+          <text x="330" y="86" text-anchor="middle" class="m-x">模式切换</text>
+          <text x="490" y="72" text-anchor="middle" class="m-x">目标确认</text>
+          <text x="660" y="100" text-anchor="middle" class="m-x">授权请求</text>
+          <text x="820" y="86" text-anchor="middle" class="m-x">返航申请</text>
+          <line x1="170" y1="106" x2="170" y2="144" stroke="rgba(34,211,238,.35)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="330" y1="92" x2="330" y2="144" stroke="rgba(34,211,238,.35)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="490" y1="78" x2="490" y2="144" stroke="rgba(34,211,238,.35)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="660" y1="106" x2="660" y2="144" stroke="rgba(34,211,238,.35)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="820" y1="92" x2="820" y2="144" stroke="rgba(34,211,238,.35)" stroke-width="1" stroke-dasharray="3 3"/>
+
+          <!-- 下方能耗与链路曲线（示意） -->
+          <path d="M40,244 L170,236 L330,222 L490,228 L660,210 L820,232 L940,246" stroke="#a78bfa" stroke-width="1.6" fill="none"/>
+          <text x="46" y="266" class="m-s" fill="#a78bfa">能量储备（示意）</text>
+          <path d="M40,282 L330,276 L490,268 L660,274 L940,270" stroke="#4ade80" stroke-width="1.4" fill="none" stroke-dasharray="5 4"/>
+          <text x="46" y="296" class="m-s" fill="#4ade80">链路可用性（示意，含中继与降级）</text>
+        </svg>
+        <div class="fig-cap"><b>图 6-1</b>　任务剖面：从投送展开到撤收保障的六个阶段及其关键时间预算。下方为能量与链路示意曲线，用于说明「为什么需要中继」与「为什么低电量必须优先保障可回收」。</div>
+      </div>
+
+      <div class="note warn">
+        <span class="k">SCENARIO DISCIPLINE / 场景纪律</span>
+        运行场景不是「成功故事集」。凡运行中出现过的异常（含传闻、演习教训、历史战例），
+        都必须在本章有分析与应对；应对策略按发生概率分级：高概率 → 设计内自动处理；中概率 → 提示 + 人工处置；
+        低概率但后果严重 → 冗余 + 记录 + 事后复盘。
+      </div>
+    </section>
+
+    <section class="chap" id="strs-6b" data-vol="strs" data-group="strs" data-t="BtRS-6.2 运行场景">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 6.2</span>
+        <div>
+          <h2>运行场景</h2>
+          <span class="chap-sub">OPERATIONAL SCENARIOS · 正常 / 退化 / 异常</span>
+        </div>
+      </div>
+
+      <p>
+        场景是「生命周期的切片」。以下 12 个场景分为正常（SN）、退化（SD）、异常（SA）三组，
+        每个场景给出活动分解（只分解一层）与涉及的相关方需求编号，作为确认测试程序的输入。
+      </p>
+
+      <h3 id="strs-6-2-1"><span class="n">6.2.1</span>正常场景（SN）</h3>
+
+      <details class="trd">
+        <summary><span class="tid">SN-01</span><b>建筑首入侦察</b><span class="tpri">正常 · 涉及 SR-01/03/04/16</span></summary>
+        <div class="trd-body">
+          <p><b>前提</b>：分队在建筑外围安全线集结；1 台平台处于 S2 状态，电量 ≥ 80%。</p>
+          <p><b>活动分解</b>：① 接受「A 栋 1~3 层侦察」任务并回执；② 轮式抵近至门洞前 20 m；③ 切换足式，越门槛进入；④ 逐房间扫描、建图、标记门窗与通道；
+          ⑤ 识别到 2 名持械人员，输出坐标与置信度（0.93 / 0.88）；⑥ 推送目标与图像至分队长终端；⑦ 建立回撤路线并保持链路。</p>
+          <p><b>确认要点</b>：楼层覆盖完整、目标坐标可复核、链路不中断、回撤路线可用。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SN-02</span><b>楼梯攀爬与楼层切换</b><span class="tpri">正常 · 涉及 SR-04/19</span></summary>
+        <div class="trd-body">
+          <p><b>活动分解</b>：① 识别楼梯参数（踏步高/宽、扶手、净宽）；② 切换足式并锁死轮毂；③ 逐级攀爬，保持机体水平与相机稳定；④ 到达平台层后恢复轮式；
+          ⑤ 更新楼层平面与垂直坐标；⑥ 回报楼层切换完成。</p>
+          <p><b>确认要点</b>：标准楼梯一次通过率、攀爬噪声、垂直定位误差 ≤ 0.3 m。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SN-03</span><b>目标标定与火力引导</b><span class="tpri">正常 · 涉及 SR-10/05/16</span></summary>
+        <div class="trd-body">
+          <p><b>活动分解</b>：① 稳定平台（足端锁定）；② 双光成像与目标跟踪；③ 解算坐标与置信度；④ 生成符合体系报文格式的引导数据；
+          ⑤ 经指挥节点下达火力单元；⑥ 观测弹着并回报修正量；⑦ 回报毁伤评估。</p>
+          <p><b>确认要点</b>：从标定到射击指令 ≤ 90 s；首轮命中率；修正量可追溯。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SN-04</span><b>伴随编队行军</b><span class="tpri">正常 · 涉及 SR-01/03/10</span></summary>
+        <div class="trd-body">
+          <p><b>活动分解</b>：① 建立编组与相对位置约束；② 跟随步兵分队沿指定路线机动；③ 通过狭窄通道时让行；④ 保持与有人战车的速度匹配；
+          ⑤ 周期性交换编队态势；⑥ 遇岔路按分队长指令选择。</p>
+          <p><b>确认要点</b>：跟随误差 ≤ 5 m；不遮挡人员视线与射界；速度不掉队。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SN-05</span><b>换电与再出动</b><span class="tpri">正常 · 涉及 SR-07/12</span></summary>
+        <div class="trd-body">
+          <p><b>活动分解</b>：① 低电量告警，申请返航；② 返回前沿换电点；③ 武器站锁死、整机断电；④ 2 人 3 min 内完成电池快换；
+          ⑤ 上电自检、BMS 状态广播；⑥ 重新入网并接受第二轮任务。</p>
+          <p><b>确认要点</b>：换电时间、再入网时间、换电后自检通过率。</p>
+        </div>
+      </details>
+
+      <h3 id="strs-6-2-2"><span class="n">6.2.2</span>退化场景（SD）</h3>
+
+      <details class="trd">
+        <summary><span class="tid">SD-01</span><b>GNSS 拒止下的自主导航</b><span class="tpri">退化 · 涉及 SR-15/02/05</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：GPS 信号丢失或被欺骗，卫星定位质量骤降。</p>
+          <p><b>活动分解</b>：① 检测定位置信度下降；② 切换惯性/视觉/轮式里程计组合导航；③ 与先验地图匹配校正；④ 降低速度并增加避障冗余；
+          ⑤ 向指控上报「定位降级」状态；⑥ 任务继续或按指令返航。</p>
+          <p><b>确认要点</b>：30 min 漂移 ≤ 5 m；不误入危险地形；状态上报及时。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SD-02</span><b>强干扰下的中继恢复</b><span class="tpri">退化 · 涉及 SR-02/05/14</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：分队链路中断，平台自身仍保持局部可用链路。</p>
+          <p><b>活动分解</b>：① 识别失联节点与链路拓扑；② 自主规划至制高点/窗口位；③ 建立自组网转发路由；④ 动态换频避开被压制频段；
+          ⑤ 广播恢复通知；⑥ 评估阵位暴露风险，必要时转移。</p>
+          <p><b>确认要点</b>：60 s 内恢复连通；中继吞吐满足态势与视频需求。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SD-03</span><b>算力过热降级</b><span class="tpri">退化 · 涉及 SR-06/15</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：连续交战/高温环境导致 AI 算力节点温度超阈值。</p>
+          <p><b>活动分解</b>：① 温度告警，自动降频；② 若仍超限，切断武器控制权、转入纯遥控；③ 保留视频与标定功能；
+          ④ 上报降级状态与原因；⑤ 降温后按人工指令恢复。</p>
+          <p><b>确认要点</b>：降级后仍可回收；武器权限切断可靠、不可被软件绕过。</p>
+        </div>
+      </details>
+
+      <h3 id="strs-6-2-3"><span class="n">6.2.3</span>异常场景（SA）</h3>
+
+      <details class="trd">
+        <summary><span class="tid">SA-01</span><b>平民闯入射击扇区</b><span class="tpri">异常 · 涉及 SR-16/17/18</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：授权过程中，非战斗人员从侧门进入射击扇区。</p>
+          <p><b>活动分解</b>：① 近距人员探测触发；② 立即告警并锁定扇区（击发电路断开）；③ 请求人工确认并建议暂缓；
+          ④ 记录图像、时间、坐标范围；⑤ 分队取消或转移射击；⑥ 事件写入合规证据链。</p>
+          <p><b>确认要点</b>：告警时延 ≤ 1 s；扇区锁定 100% 生效；记录可导出。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SA-02</span><b>授权中断或撤销</b><span class="tpri">异常 · 涉及 SR-16/09</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：授权后、击发前，授权人撤销或链路中断导致授权码失效。</p>
+          <p><b>活动分解</b>：① 接收撤销指令或超时判定；② 立即取消击发、保险复位；③ 上报「已取消」与原因；
+          ④ 目标转为「观察」状态；⑤ 记录整段授权时序。</p>
+          <p><b>确认要点</b>：撤销生效 ≤ 300 ms；不得出现「撤销后仍击发」。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SA-03</span><b>平台翻覆或卡滞</b><span class="tpri">异常 · 涉及 SR-12/10/20</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：越障失败导致翻覆、卡在废墟缝隙、足端失效。</p>
+          <p><b>活动分解</b>：① 姿态异常检测，切断武器与射击；② 尝试自救步态（若安全）；③ 上报位置与姿态，请求人工处置；
+          ④ 进入低功耗静默待机；⑤ 无法回收时按指令执行数据自毁。</p>
+          <p><b>确认要点</b>：自救不造成二次损伤；待机功耗；自毁可验证。</p>
+        </div>
+      </details>
+
+      <details class="trd">
+        <summary><span class="tid">SA-04</span><b>劫持尝试与被俘风险</b><span class="tpri">异常 · 涉及 SR-15/20</span></summary>
+        <div class="trd-body">
+          <p><b>触发</b>：检测到异常控制报文、非法固件、物理接近与拆解痕迹。</p>
+          <p><b>活动分解</b>：① 校验报文签名，拒绝非法指令；② 触发安全锁定（D3）；③ 擦除临时密钥与敏感缓存；
+          ④ 上报安全事件；⑤ 若确认将被俘获，执行物理自毁程序。</p>
+          <p><b>确认要点</b>：非法指令拒绝率 100%；擦除与自毁可验证、不可恢复。</p>
+        </div>
+      </details>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">场景</th><th style="width:170px">名称</th><th style="width:90px">类型</th><th>派生的关键需求</th><th style="width:130px">验证阶段</th></tr></thead>
+            <tbody>
+              <tr><td class="id">SN-01</td><td>建筑首入侦察</td><td><span class="chip c-direct">正常</span></td><td>SR-01 交互简捷、SR-04 越障、SR-16 识别与授权</td><td>靶场 + 实兵试用</td></tr>
+              <tr><td class="id">SN-02</td><td>楼梯攀爬</td><td><span class="chip c-direct">正常</span></td><td>SR-04 越障与姿态、SR-19 低噪声</td><td>环境试验</td></tr>
+              <tr><td class="id">SN-03</td><td>火力引导</td><td><span class="chip c-direct">正常</span></td><td>SR-05 协议、SR-10 接口、SR-16 授权</td><td>靶场实弹</td></tr>
+              <tr><td class="id">SN-04</td><td>伴随行军</td><td><span class="chip c-direct">正常</span></td><td>SR-01 追随、SR-03 协同、SR-10 载荷</td><td>行军试验</td></tr>
+              <tr><td class="id">SN-05</td><td>换电再出动</td><td><span class="chip c-direct">正常</span></td><td>SR-07 快换、SR-12 模块化</td><td>保障性试验</td></tr>
+              <tr><td class="id">SD-01</td><td>GNSS 拒止</td><td><span class="chip c-aff">退化</span></td><td>SR-15 组合导航、SR-02 抗干扰</td><td>电磁环境试验</td></tr>
+              <tr><td class="id">SD-02</td><td>中继恢复</td><td><span class="chip c-aff">退化</span></td><td>SR-05 多链路、SR-14 频谱、SR-02 抗扰</td><td>链路注入试验</td></tr>
+              <tr><td class="id">SD-03</td><td>算力降级</td><td><span class="chip c-aff">退化</span></td><td>SR-06 OTA/算力、SR-15 安全切断</td><td>热环境试验</td></tr>
+              <tr><td class="id">SA-01</td><td>平民闯入</td><td><span class="chip c-cons">异常</span></td><td>SR-16 授权、SR-17 急停避让、SR-18 姿态识别</td><td>合规情景测试</td></tr>
+              <tr><td class="id">SA-02</td><td>授权撤销</td><td><span class="chip c-cons">异常</span></td><td>SR-16 撤销、SR-09 ROE 校验</td><td>授权链测试</td></tr>
+              <tr><td class="id">SA-03</td><td>翻覆卡滞</td><td><span class="chip c-cons">异常</span></td><td>SR-10 结构、SR-12 快修、SR-20 自毁</td><td>破坏性试验</td></tr>
+              <tr><td class="id">SA-04</td><td>劫持被俘</td><td><span class="chip c-red">异常</span></td><td>SR-15 防劫持、SR-20 数据销毁</td><td>网络安全测试</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-5　场景与需求、验证阶段的对应</div>
+      </div>
+
+      <h3 id="strs-6-3"><span class="n">6.3</span>采办概念</h3>
+      <ul>
+        <li><b>采办方式</b>：立项论证 → 方案竞争 → 样机研制 → 试验鉴定 → 小批量试用 → 定型批产；算法模型以「版本 + 服务」方式随合同交付。</li>
+        <li><b>合同安排</b>：总体研制合同（含集成与总装）+ 分系统配套合同 + 算法服务合同 + 保障与训练合同。</li>
+        <li><b>验收依据</b>：BRS 的 MOE、BtRS 的 SR 条目、附录 E 的验证准则三者共同构成验收基线。</li>
+        <li><b>风险处置</b>：对关键件设置双源；对算法设置「成熟度门槛」与回退方案（无 AI 时仍可遥控作战）。</li>
+      </ul>
+
+      <h3 id="strs-6-4"><span class="n">6.4</span>部署概念</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:130px">部署环节</th><th>内容</th><th style="width:150px">约束/指标</th></tr></thead>
+            <tbody>
+              <tr><td class="name">存储与预置</td><td>存放于运输箱，前置预置于补给点；定期通电检测与电池维护。</td><td>存储温度 −30 ~ +55 ℃；月自检 ≥ 1 次</td></tr>
+              <tr><td class="name">运输</td><td>随车（装甲车/运输车）或机降吊运；具备吊装环与系留接口。</td><td>折叠态 ≤ 1.2×0.8×0.9 m；质量 ≤ 120 kg</td></tr>
+              <tr><td class="name">展开</td><td>2 人出箱、装配、加电、自检、入网、配属。</td><td>≤ 15 min；入网 ≤ 3 min</td></tr>
+              <tr><td class="name">配属</td><td>按编成配属至分队，完成协同标识与角色设定。</td><td>编组建立 ≤ 2 min</td></tr>
+              <tr><td class="name">撤收</td><td>断电、折叠、清洁、装箱；战损件按流程回收或销毁。</td><td>≤ 10 min（2 人）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 6-6　部署概念</div>
+      </div>
+
+      <h3 id="strs-6-5"><span class="n">6.5</span>支持概念</h3>
+      <div class="grid g3">
+        <div class="card">
+          <div class="ct"><span class="tag">一级</span>分队级</div>
+          <div class="cd">换电、补弹、模块更换、BIT 判读、清洁保养。要求：无专用工具、2 人可完成、有图文/语音引导。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">二级</span>旅团级</div>
+          <div class="cd">故障件更换与检测、标定、备件管理、软件配置与版本回滚。要求：具备测试设备与备件库。</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="tag">三级</span>基地级</div>
+          <div class="cd">大修、结构修复、算法重训与升级、退役处置。要求：与研制单位数据链路连通，支持远程支持。</div>
+        </div>
+      </div>
+
+      <h3 id="strs-6-6"><span class="n">6.6</span>弃置概念</h3>
+      <ul>
+        <li><b>脱密与销毁</b>：退役前完成数据擦除与密钥销毁，过程可验证；残骸与模块按涉密等级处理。</li>
+        <li><b>电池与材料</b>：锂电池按危废流程回收；复合材料与结构件标注材质与回收方式。</li>
+        <li><b>战损处置</b>：可回收的回收；不可回收的远程触发擦除，避免算法与密钥落入敌方。</li>
+        <li><b>记录归档</b>：处置记录（含擦除验证结果）进入装备履历，供审计。</li>
+      </ul>
+    </section>
+
+    <section class="chap" id="strs-7" data-vol="strs" data-group="strs" data-t="BtRS-7 项目约束">
+      <div class="chap-head">
+        <span class="chap-no s">BtRS · 7</span>
+        <div>
+          <h2>项目约束</h2>
+          <span class="chap-sub">PROJECT CONSTRAINTS</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:86px">编号</th><th style="width:150px">类型</th><th>内容</th><th style="width:120px">影响的需求</th></tr></thead>
+            <tbody>
+              <tr><td class="id">PJ-01</td><td class="name">进度</td><td>概念→方案→样机→鉴定→定型节点锁定；算法成熟度不得成为关键路径。</td><td>SR-06 / SR-11</td></tr>
+              <tr><td class="id">PJ-02</td><td class="name">成本</td><td>单机成本落入可承受战损区间；全寿命费用可负担。</td><td>SR-12 / SR-19</td></tr>
+              <tr><td class="id">PJ-03</td><td class="name">重量与外形</td><td>折叠态满足运输箱与吊装限制；整机 ≤ 120 kg。</td><td>SR-11 / SR-13</td></tr>
+              <tr><td class="id">PJ-04</td><td class="name">环境适应性</td><td>−20 ~ +45 ℃；雨雾烟尘；振动冲击满足运输与作战。</td><td>SR-13 / SR-10</td></tr>
+              <tr><td class="id">PJ-05</td><td class="name">法规与伦理</td><td>人在回路；平民保护；伦理审查通过。</td><td>SR-16 / SR-17 / SR-18</td></tr>
+              <tr><td class="id">PJ-06</td><td class="name">保密与安全</td><td>加密、抗劫持、可销毁；数据分级管理。</td><td>SR-15 / SR-20</td></tr>
+              <tr><td class="id">PJ-07</td><td class="name">供应链</td><td>关键件双源、国产替代路径明确。</td><td>SR-12 / SR-19</td></tr>
+              <tr><td class="id">PJ-08</td><td class="name">互操作</td><td>体系协议冻结或受控变更；接口标准统一。</td><td>SR-05 / SR-10 / SR-14</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 7-1　项目约束</div>
+      </div>
+    </section>
+
+    <section class="chap" id="ap-a" data-vol="strs" data-group="strs" data-t="附录 A 相关方需要">
+      <div class="chap-head">
+        <span class="chap-no s">附录 A</span>
+        <div>
+          <h2>相关方需要（Need）</h2>
+          <span class="chap-sub">STAKEHOLDER NEEDS · 20 条原始诉求</span>
+        </div>
+      </div>
+      <p>
+        「需要」是相关方站在自身立场表达的意图，可能隐含、不完整甚至彼此冲突。本附录保留其原始表述，
+        以便在附录 B 中看到「需要 → 需求」的转化过程，而不是只看到被整理过的结果。
+      </p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:60px">编号</th><th style="width:56px">类别</th><th style="width:170px">相关方</th><th>核心需要（原始表述）</th><th style="width:220px">隐含信息 / 需澄清点</th></tr></thead>
+            <tbody>
+              <tr><td class="id">N-01</td><td><span class="chip c-direct">直接</span></td><td class="name">一线作战班组</td><td>操控简单不增加负担；遇到危险能随时接管；需要火力支援时能快速响应。</td><td>「简单」需量化为操作步骤与培训时长；「快速响应」需定义为从请求到射击的时间。</td></tr>
+              <tr><td class="id">N-02</td><td><span class="chip c-direct">直接</span></td><td class="name">敌方电子战/火力单元</td><td>（对抗性诉求）敌方企图干扰、瘫痪或摧毁平台。</td><td>不是「需要」，而是威胁输入；须转化为我方抗干扰与生存性需求。</td></tr>
+              <tr><td class="id">N-03</td><td><span class="chip c-direct">直接</span></td><td class="name">同编队友军无人集群</td><td>彼此不碰撞；无线电不互相干扰；能互相共享目标信息。</td><td>「不碰撞」需定义安全间距与仲裁规则；「共享」需定义报文格式。</td></tr>
+              <tr><td class="id">N-04</td><td><span class="chip c-direct">直接</span></td><td class="name">有人战车/突击车乘员</td><td>平台不能拖后腿；能融入有人车队的战术队形。</td><td>「不拖后腿」需量化速度、加速度与转向半径匹配度。</td></tr>
+              <tr><td class="id">N-05</td><td><span class="chip c-inter">交互</span></td><td class="name">体系指挥控制网络</td><td>随时在线不掉线；数据格式统一能看懂；能接受指挥并回传态势。</td><td>「随时在线」需定义可用率与重连时间；「统一」需指定协议版本。</td></tr>
+              <tr><td class="id">N-06</td><td><span class="chip c-inter">交互</span></td><td class="name">算法与 AI 模型提供方</td><td>硬件算力够用；能方便地 OTA 推送新算法；能收集边缘数据。</td><td>「算力够用」需给出实时检测帧率与模型规模；「边缘数据」需定义采集与回传策略。</td></tr>
+              <tr><td class="id">N-07</td><td><span class="chip c-inter">交互</span></td><td class="name">前沿充电桩/换电站</td><td>充电快；接口统一；电池状态透明。</td><td>「快」需量化为换电时间；「统一」需引用接口标准。</td></tr>
+              <tr><td class="id">N-08</td><td><span class="chip c-inter">交互</span></td><td class="name">卫星通信/数据链运营商</td><td>频谱利用率高；不干扰其他民用/军用设备。</td><td>需转化为带外辐射与功率控制指标。</td></tr>
+              <tr><td class="id">N-09</td><td><span class="chip c-inter">交互</span></td><td class="name">高精地图与地理情报机构</td><td>能正确使用先验地图；能把实时发现的地形变化回传。</td><td>需定义地图格式、精度与更新接口。</td></tr>
+              <tr><td class="id">N-10</td><td><span class="chip c-inter">交互</span></td><td class="name">武器/弹药供应商</td><td>武器站接口标准；弹药状态可视；后坐力不损坏平台。</td><td>需定义机械/电气/数据接口与后坐能量指标。</td></tr>
+              <tr><td class="id">N-11</td><td><span class="chip c-inter">交互</span></td><td class="name">前线运输投送部队</td><td>好装卸；重量和尺寸不能超出运输车辆/直升机限制。</td><td>需给出具体运输标准与吊装点。</td></tr>
+              <tr><td class="id">N-12</td><td><span class="chip c-inter">交互</span></td><td class="name">装备维修与抢修分队</td><td>好修；故障好定位；模块好拆。</td><td>「好」需量化为故障定位时间与换件时间。</td></tr>
+              <tr><td class="id">N-13</td><td><span class="chip c-cons">约束</span></td><td class="name">装备采办与试验鉴定局</td><td>指标达标；安全可靠；符合国军标。</td><td>需明确适用标准清单与鉴定试验项目。</td></tr>
+              <tr><td class="id">N-14</td><td><span class="chip c-cons">约束</span></td><td class="name">频谱管理与法规机构</td><td>不乱占频率；符合电磁兼容标准。</td><td>需提供用频申请与许可证据链。</td></tr>
+              <tr><td class="id">N-15</td><td><span class="chip c-cons">约束</span></td><td class="name">网络安全与保密部门</td><td>不被黑客劫持；数据不泄露；不怕 GPS 欺骗。</td><td>需明确密码算法、密钥管理与销毁验证方式。</td></tr>
+              <tr><td class="id">N-16</td><td><span class="chip c-cons">约束</span></td><td class="name">国际战争伦理委员会</td><td>人类必须控制开火权；不能误杀。</td><td>需给出人在回路的可验证机制与审查证据。</td></tr>
+              <tr><td class="id">N-17</td><td><span class="chip c-aff">被影响</span></td><td class="name">平民/非战斗人员</td><td>不要伤害我；不要侵犯我的隐私。</td><td>需转化为识别、告警、避让与扇区锁死的具体能力。</td></tr>
+              <tr><td class="id">N-18</td><td><span class="chip c-aff">被影响</span></td><td class="name">敌方战俘/伤员</td><td>（人道诉求）遵守日内瓦公约，不杀降。</td><td>需定义「投降/非武装姿态」的识别类别与判定阈值。</td></tr>
+              <tr><td class="id">N-19</td><td><span class="chip c-aff">被影响</span></td><td class="name">自然环境与生态</td><td>不要污染环境；尽量减少噪音和地貌破坏。</td><td>需转化为电池安全、噪声限值与材料回收要求。</td></tr>
+              <tr><td class="id">N-20</td><td><span class="chip c-aff">被影响</span></td><td class="name">媒体与公众舆论</td><td>没有平民伤亡丑闻；装备看起来先进。</td><td>需转化为记录可追溯与外观/伪装要求，同时防止「为好看牺牲隐蔽」。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 A-1　相关方需要（原始表述与需澄清点）</div>
+      </div>
+    </section>
+
+    <section class="chap" id="ap-b" data-vol="strs" data-group="strs" data-t="附录 B 相关方需求 SR">
+      <div class="chap-head">
+        <span class="chap-no s">附录 B</span>
+        <div>
+          <h2>相关方需求（SR-01 ~ SR-20）</h2>
+          <span class="chap-sub">STAKEHOLDER REQUIREMENTS · 可验证的需求条目</span>
+        </div>
+      </div>
+      <p>
+        每条 SR 由对应的需要转化而来，满足「单一、无歧义、可验证、可追溯」。优先级采用「必须 / 应该 / 可选」三级，
+        验证方法采用 I（检查）、A（分析）、D（演示）、T（测试）。
+      </p>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr>
+              <th style="width:64px">编号</th><th style="width:150px">相关方</th><th style="width:56px">来源</th>
+              <th>需求陈述</th><th style="width:150px">架构落点</th><th style="width:62px">优先级</th><th style="width:58px">验证</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="id">SR-01</td><td class="name">一线作战班组</td><td class="c">N-01</td><td>平台须提供一键紧急制动与接管（物理按键），接管响应 ≤ 300 ms；人机界面支持触屏、手柄与语音，常用任务操作步骤 ≤ 3 步；具备伴随行驶与自动跟车模式。</td><td>协同接口子系统 / 交互平板模块</td><td><span class="chip c-red">必须</span></td><td class="c">T/D</td></tr>
+              <tr><td class="id">SR-02</td><td class="name">敌方电子战/火力单元</td><td class="c">N-02</td><td>通信链路须具备跳频/扩频抗干扰能力，干扰环境下链路可用率 ≥ 70%；具备低红外与低雷达特征；车体具备防轻武器与破片能力。</td><td>战术通信子系统 / 结构与防护系统</td><td><span class="chip c-red">必须</span></td><td class="c">T</td></tr>
+              <tr><td class="id">SR-03</td><td class="name">同编队友军无人集群</td><td class="c">N-03</td><td>具备基于空间优先级的动态避障（编队内冲突率 = 0）；具备多址接入与动态频谱分配；具备跨域协同目标分配接口，重复分配率 ≤ 2%。</td><td>感知与导航系统 / 战术通信子系统</td><td><span class="chip c-red">必须</span></td><td class="c">T/A</td></tr>
+              <tr><td class="id">SR-04</td><td class="name">有人战车乘员</td><td class="c">N-04</td><td>铺装路面最大速度 ≥ 10 km/h；与有人战车数据链即插即用互通；具备行进间射击与姿态稳定能力（姿态恢复 ≤ 1.5 s）。</td><td>轮腿复合移动系统 / 武器站伺服</td><td><span class="chip c-red">必须</span></td><td class="c">T</td></tr>
+              <tr><td class="id">SR-05</td><td class="name">体系指挥控制网络</td><td class="c">N-05</td><td>须兼容体系规定的数据链协议与报文格式；具备自组网 + 卫通多链路冗余；具备边缘态势融合与实时上报（周期 ≤ 2 s）；入网 ≤ 3 min。</td><td>指控通信系统 / 数据链接口板</td><td><span class="chip c-red">必须</span></td><td class="c">T/I</td></tr>
+              <tr><td class="id">SR-06</td><td class="name">算法与 AI 模型提供方</td><td class="c">N-06</td><td>搭载边缘 AI 计算单元，满足实时目标检测算力需求；预留标准化 OTA 远程升级接口，支持版本回滚；具备黑匣子数据记录与 Corner Case 提取能力。</td><td>任务计算子系统 / AI 推理计算卡</td><td><span class="chip c-red">必须</span></td><td class="c">T/I</td></tr>
+              <tr><td class="id">SR-07</td><td class="name">前沿充电桩/换电站</td><td class="c">N-07</td><td>采用标准化快速充电物理接口；电池包支持快速机械快换（≤ 3 min，2 人）；BMS 具备无线状态广播。</td><td>能源与热管理 / 电池包模块</td><td><span class="chip c-red">必须</span></td><td class="c">T/D</td></tr>
+              <tr><td class="id">SR-08</td><td class="name">卫通/数据链运营商</td><td class="c">N-08</td><td>通信模块符合军用/民用电磁兼容标准；具备自适应功率控制，降低带外辐射与杂散。</td><td>战术通信子系统</td><td><span class="chip c-cons">应该</span></td><td class="c">A/T</td></tr>
+              <tr><td class="id">SR-09</td><td class="name">高精地图与情报机构</td><td class="c">N-09</td><td>具备先验高精地图导入与 SLAM 匹配模块；具备局部环境变化检测与增量建图回传功能。</td><td>定位与建图子系统</td><td><span class="chip c-cons">应该</span></td><td class="c">T</td></tr>
+              <tr><td class="id">SR-10</td><td class="name">武器/弹药供应商</td><td class="c">N-10</td><td>提供标准机械锁紧与电气/数据盲插接口，换装 ≤ 10 min；具备弹药余量实时监测与回传；武器站配备高效后坐力缓冲吸能模块。</td><td>载荷快换接口 / 射击控制</td><td><span class="chip c-red">必须</span></td><td class="c">T/D</td></tr>
+              <tr><td class="id">SR-11</td><td class="name">前线运输投送部队</td><td class="c">N-11</td><td>整机质量与外形满足空运/车运标准（折叠态 ≤ 1.2×0.8×0.9 m，≤ 120 kg）；具备标准化吊装环与系留接口。</td><td>轻量化车身 / 结构防护</td><td><span class="chip c-red">必须</span></td><td class="c">I/T</td></tr>
+              <tr><td class="id">SR-12</td><td class="name">装备维修与抢修分队</td><td class="c">N-12</td><td>采用模块化快拆结构（腿部、轮毂、电池、算力盒）；具备系统级 BIT 与故障代码隔离上报，故障定位 ≤ 15 min，模块更换 ≤ 10 min。</td><td>结构与防护 / 各子系统模块化</td><td><span class="chip c-red">必须</span></td><td class="c">T/D</td></tr>
+              <tr><td class="id">SR-13</td><td class="name">装备采办与试验鉴定局</td><td class="c">N-13</td><td>全系统满足环境适应性与可靠性指标（−20~+45 ℃、防护等级、寿命）；结构通过跌落、振动与冲击试验。</td><td>整机级指标约束</td><td><span class="chip c-red">必须</span></td><td class="c">T/I</td></tr>
+              <tr><td class="id">SR-14</td><td class="name">频谱管理与法规机构</td><td class="c">N-14</td><td>射频模块具备用频许可证明；满足带外杂散辐射抑制与电磁兼容要求。</td><td>战术通信子系统</td><td><span class="chip c-cons">应该</span></td><td class="c">I/A</td></tr>
+              <tr><td class="id">SR-15</td><td class="name">网络安全与保密部门</td><td class="c">N-15</td><td>搭载硬件级可信根（TPM）与国密加密；具备防 GPS 欺骗的惯性/视觉组合导航备份（30 min 漂移 ≤ 5 m）；具备敏感数据一键物理销毁能力。</td><td>任务计算 / 定位与建图</td><td><span class="chip c-red">必须</span></td><td class="c">T/A</td></tr>
+              <tr><td class="id">SR-16</td><td class="name">国际战争伦理委员会</td><td class="c">N-16</td><td>必须保留人在回路的物理/软件授权击发机制（授权码、可撤销）；算法须具备非战斗人员特征识别与过滤（召回 ≥ 95%，误判 ≤ 2%）。</td><td>射击控制 / 目标探测与识别</td><td><span class="chip c-red">必须</span></td><td class="c">T/D</td></tr>
+              <tr><td class="id">SR-17</td><td class="name">平民/非战斗人员</td><td class="c">N-17</td><td>具备射击安全扇区地理围栏锁死功能（失败即物理断开）；具备近距离人员探测与自动急停避让（告警 ≤ 1 s）。</td><td>环境感知 / 射击控制</td><td><span class="chip c-red">必须</span></td><td class="c">T</td></tr>
+              <tr><td class="id">SR-18</td><td class="name">敌方战俘/伤员</td><td class="c">N-18</td><td>目标识别算法须包含「举手、跪地、丢弃武器」等非武装姿态识别模型，并作为禁止打击类别输出。</td><td>目标探测与识别子系统</td><td><span class="chip c-cons">应该</span></td><td class="c">T</td></tr>
+              <tr><td class="id">SR-19</td><td class="name">自然环境与生态</td><td class="c">N-19</td><td>电池包满足防爆、防漏液标准；采用纯电驱动以降低声学特征（10 m 处 ≤ 65 dB(A)）；车身材料具备可回收或环保标识。</td><td>能源与热管理 / 轮腿复合移动</td><td><span class="chip c-cons">应该</span></td><td class="c">T/I</td></tr>
+              <tr><td class="id">SR-20</td><td class="name">媒体与公众舆论</td><td class="c">N-20</td><td>具备作战过程全程音视频记录（黑匣子）与防篡改功能，用于事后追溯；具备多光谱伪装罩以提升隐蔽性。</td><td>数据存储模块 / 防护与伪装</td><td><span class="chip c-cons">应该</span></td><td class="c">T/I</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 B-1　相关方需求条目（20 条）</div>
+      </div>
+
+      <div class="note">
+        <span class="k">QUALITY CHECK / 条目质量自查</span>
+        20 条 SR 全部满足：① 单一句（无「和/或」造成的多需求混装，个别保留的并列已注明为同一能力的不同侧面）；
+        ② 含可判定阈值；③ 有来源（N-xx）与落点（系统/子系统）；④ 有验证方法；⑤ 不预设具体设计（除法规强制的物理断开等）。
+      </div>
+    </section>
+
+    <section class="chap" id="ap-c" data-vol="strs" data-group="strs" data-t="附录 C TR 与 SR 对照">
+      <div class="chap-head">
+        <span class="chap-no s">附录 C</span>
+        <div>
+          <h2>任务需求与相关方需求对照</h2>
+          <span class="chap-sub">TR ↔ SR MATRIX</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">任务需求</th><th style="width:200px">名称</th><th>支撑它的相关方需求（SR）</th><th style="width:170px">主要相关方</th></tr></thead>
+            <tbody>
+              <tr><td class="id">TR-01</td><td class="name">复杂地形隐蔽抵近</td><td>SR-04（速度与稳定）、SR-19（低噪声与纯电）</td><td>一线班组、有人战车乘员</td></tr>
+              <tr><td class="id">TR-02</td><td class="name">目标侦察与精准标定</td><td>SR-09（地图匹配）、SR-10（载荷接口）、SR-16（识别过滤）、SR-18（姿态识别）</td><td>班组、火力单元、伦理委员会</td></tr>
+              <tr><td class="id">TR-03</td><td class="name">载荷快换与伴随打击</td><td>SR-01（交互与接管）、SR-10（武器接口与后坐）、SR-16（授权）</td><td>班组、武器供应商</td></tr>
+              <tr><td class="id">TR-04</td><td class="name">通信拒止下的中继</td><td>SR-05（多链路冗余）、SR-14（用频合规）、SR-02（抗干扰）</td><td>体系指控网络、友军集群</td></tr>
+              <tr><td class="id">TR-05</td><td class="name">体系互操作即插即用</td><td>SR-05（协议与入网）、SR-13（鉴定合规）</td><td>体系指控网络、采办鉴定局</td></tr>
+              <tr><td class="id">TR-06</td><td class="name">人机混编与可追溯</td><td>SR-01（易用与接管）、SR-16（授权机制）、SR-20（记录）</td><td>班组、伦理委员会、媒体</td></tr>
+              <tr><td class="id">TR-07</td><td class="name">跨域协同与避让</td><td>SR-03（避障与频谱分配）、SR-14（频谱合规）</td><td>友军集群、频谱机构</td></tr>
+              <tr><td class="id">TR-08</td><td class="name">抗毁与自保</td><td>SR-02（抗干扰与防护）、SR-15（组合导航与加密）</td><td>敌方电子战、网安部门</td></tr>
+              <tr><td class="id">TR-09</td><td class="name">ROE 合规与平民保护</td><td>SR-16（授权）、SR-17（扇区与避让）、SR-18（投降识别）</td><td>伦理委员会、平民、战俘</td></tr>
+              <tr><td class="id">TR-10</td><td class="name">模块化快修与可用性</td><td>SR-12（快拆与 BIT）、SR-07（快换）、SR-11（运输适配）</td><td>维修分队、换电站、投送部队</td></tr>
+              <tr><td class="id">TR-11</td><td class="name">算法迭代与数据资产</td><td>SR-06（算力与 OTA）、SR-15（安全）</td><td>算法提供方、网安部门</td></tr>
+              <tr><td class="id">TR-12</td><td class="name">环保与退役处置</td><td>SR-20（记录与销毁）、SR-19（电池与材料）</td><td>自然环境、采办局</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 C-1　TR → SR 正向追溯</div>
+      </div>
+    </section>
+
+    <section class="chap" id="ap-d" data-vol="strs" data-group="strs" data-t="附录 D 追溯与验证">
+      <div class="chap-head">
+        <span class="chap-no s">附录 D</span>
+        <div>
+          <h2>需求验证与追溯矩阵（RVTM 摘要）</h2>
+          <span class="chap-sub">REQUIREMENTS VERIFICATION &amp; TRACEABILITY MATRIX</span>
+        </div>
+      </div>
+      <p>
+        RVTM 是需求评审的必备制品。下表给出「业务目的 → 任务需求 → 相关方需求 → 系统/子系统 → 验证方法」的完整链路摘要，
+        完整矩阵应在项目需求管理工具中维护，并具备正向与逆向双向追溯能力。
+      </p>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr>
+              <th style="width:64px">业务目的</th><th style="width:70px">任务需求</th><th style="width:110px">相关方需求</th>
+              <th style="width:170px">系统 / 子系统</th><th style="width:120px">验证方法</th><th style="width:100px">对应 MOE</th><th>备注</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="id">BO-01</td><td class="id">TR-01</td><td>SR-04 / SR-19</td><td>轮腿复合移动 / 轮驱、腿部作动、悬架</td><td>试验（越障场）</td><td>MOE-01</td><td>楼梯、废墟、壕沟三类地形全覆盖</td></tr>
+              <tr><td class="id">BO-02</td><td class="id">TR-01</td><td>SR-01 / SR-19</td><td>协同接口 / 移动系统</td><td>演示 + 测试</td><td>MOE-02</td><td>人员暴露时间对比试验</td></tr>
+              <tr><td class="id">BO-03</td><td class="id">TR-02</td><td>SR-09 / SR-10 / SR-18</td><td>感知导航 / 目标识别 / 定位建图</td><td>测试（靶场）</td><td>MOE-01 / MOE-03</td><td>坐标精度与识别召回率</td></tr>
+              <tr><td class="id">BO-03</td><td class="id">TR-03</td><td>SR-10 / SR-16</td><td>武器管理 / 射击控制 / 载荷快换</td><td>测试 + 演示</td><td>MOE-03</td><td>端到端闭环时间与姿态恢复</td></tr>
+              <tr><td class="id">BO-04</td><td class="id">TR-04</td><td>SR-05 / SR-14 / SR-02</td><td>指控通信 / 战术通信</td><td>测试（链路注入）</td><td>MOE-04</td><td>中继建立与重构时间</td></tr>
+              <tr><td class="id">BO-04</td><td class="id">TR-05</td><td>SR-05 / SR-13</td><td>数据链接口板 / 协同接口</td><td>检查 + 测试</td><td>MOE-04</td><td>协议符合性测试零不符合项</td></tr>
+              <tr><td class="id">BO-02</td><td class="id">TR-06</td><td>SR-01 / SR-16 / SR-20</td><td>交互平板 / 射击控制 / 数据存储</td><td>演示 + 检查</td><td>MOE-07</td><td>接管时延与记录完整性</td></tr>
+              <tr><td class="id">BO-04</td><td class="id">TR-07</td><td>SR-03 / SR-14</td><td>感知导航 / 战术通信</td><td>测试（编队）</td><td>MOE-04</td><td>冲突率与重复分配率</td></tr>
+              <tr><td class="id">BO-04</td><td class="id">TR-08</td><td>SR-02 / SR-15</td><td>结构与防护 / 定位建图 / 任务计算</td><td>试验（电磁环境）</td><td>MOE-05</td><td>干扰下可用率与导航漂移</td></tr>
+              <tr><td class="id">BO-05</td><td class="id">TR-09</td><td>SR-16 / SR-17 / SR-18</td><td>射击控制 / 环境感知 / 目标识别</td><td>测试（合规情景）</td><td>MOE-07</td><td>扇区锁死与平民识别</td></tr>
+              <tr><td class="id">BO-01</td><td class="id">TR-10</td><td>SR-12 / SR-07 / SR-11</td><td>结构防护 / 能源 / 轻量化车身</td><td>演示 + 检查</td><td>MOE-05</td><td>模块更换与故障定位时间</td></tr>
+              <tr><td class="id">BO-03</td><td class="id">TR-11</td><td>SR-06 / SR-15</td><td>任务计算 / 通信链路</td><td>测试</td><td>MOE-03</td><td>OTA 时间与回滚</td></tr>
+              <tr><td class="id">BO-05</td><td class="id">TR-12</td><td>SR-20 / SR-19</td><td>数据存储 / 能源 / 结构</td><td>检查 + 测试</td><td>—</td><td>销毁可验证性</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 D-1　RVTM 摘要（正向）</div>
+      </div>
+
+      <h3 id="ap-d-1"><span class="n">D.1</span>MOE 与 MOS 的验证准则</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:80px">度量</th><th style="width:130px">名称</th><th style="width:120px">目标值</th><th style="width:110px">类型</th><th>判定方式（通过/失败判据）</th></tr></thead>
+            <tbody>
+              <tr><td class="id">MOE-01</td><td>侦察覆盖率</td><td>≥ 90%</td><td>效能</td><td>试验中必查点位有效侦察比例达到 90% 即通过；缺失点位需说明原因并计入降级统计。</td></tr>
+              <tr><td class="id">MOE-02</td><td>人员暴露下降</td><td>≥ 50%</td><td>效能</td><td>对照试验中人员进入杀伤区累计时长下降 50% 以上。</td></tr>
+              <tr><td class="id">MOE-03</td><td>杀伤链闭环</td><td>≤ 90 s（P90）</td><td>效能</td><td>不少于 30 次闭环样本，P90 ≤ 90 s 且无一条超过 150 s。</td></tr>
+              <tr><td class="id">MOE-04</td><td>体系接入与重构</td><td>入网 ≤ 3 min；重构 ≤ 60 s</td><td>效能</td><td>注入节点失效试验，链路恢复时间中位数 ≤ 60 s。</td></tr>
+              <tr><td class="id">MOE-05</td><td>任务可用率</td><td>≥ 85%</td><td>适用性</td><td>可靠性试验中可用时长占比 ≥ 85%，含降级运行。</td></tr>
+              <tr><td class="id">MOE-06</td><td>可负担性</td><td>落入可承受区间</td><td>经济性</td><td>单机成本与全寿命费用评审通过。</td></tr>
+              <tr><td class="id">MOE-07</td><td>交战合规</td><td>误伤 0；记录 100%</td><td>合规性</td><td>合规情景测试零失败；记录完整性抽查 100% 通过。</td></tr>
+              <tr><td class="id">MOS-01</td><td>越障通过率</td><td>≥ 95%</td><td>性能</td><td>标准楼梯/废墟/壕沟各 ≥ 20 次尝试，通过率 ≥ 95%。</td></tr>
+              <tr><td class="id">MOS-02</td><td>定位精度</td><td>CEP ≤ 5 m</td><td>性能</td><td>1 km 内不少于 50 组样本，CEP ≤ 5 m。</td></tr>
+              <tr><td class="id">MOS-03</td><td>识别性能</td><td>召回 ≥ 95%；误判 ≤ 2%</td><td>性能</td><td>不少于 1000 张真实场景样本测试。</td></tr>
+              <tr><td class="id">MOS-04</td><td>换电时间</td><td>≤ 3 min</td><td>保障性</td><td>10 次计时，P90 ≤ 3 min。</td></tr>
+              <tr><td class="id">MOS-05</td><td>展开时间</td><td>≤ 15 min</td><td>保障性</td><td>2 人操作，10 次计时，P90 ≤ 15 min。</td></tr>
+              <tr><td class="id">MOS-06</td><td>噪声</td><td>≤ 65 dB(A) @10 m</td><td>生存性</td><td>静音模式实测。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 D-2　MOE / MOS 与验证准则</div>
+      </div>
+    </section>
+
+    <section class="chap" id="ap-e" data-vol="strs" data-group="strs" data-t="附录 E 缩略语">
+      <div class="chap-head">
+        <span class="chap-no s">附录 E</span>
+        <div>
+          <h2>缩略语</h2>
+          <span class="chap-sub">ABBREVIATIONS</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:110px">缩略语</th><th style="width:280px">英文</th><th>中文</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">BRS</td><td>Business Requirements Specification</td><td>业务需求规格说明</td></tr>
+              <tr><td class="mono">BtRS / StRS</td><td>Stakeholder Requirements Specification</td><td>相关方需求规格说明</td></tr>
+              <tr><td class="mono">SyRS</td><td>System Requirements Specification</td><td>系统需求规格说明</td></tr>
+              <tr><td class="mono">ConOps</td><td>Concept of Operations</td><td>运营概念 / 作战想定（组织层）</td></tr>
+              <tr><td class="mono">OpsCon / OCD</td><td>Operational Concept / Document</td><td>运行概念 / 运行概念文档（系统层）</td></tr>
+              <tr><td class="mono">MOE / MOS</td><td>Measure of Effectiveness / Suitability</td><td>效能度量 / 性能度量</td></tr>
+              <tr><td class="mono">RVTM</td><td>Requirements Verification &amp; Traceability Matrix</td><td>需求验证与追溯矩阵</td></tr>
+              <tr><td class="mono">ROE</td><td>Rules of Engagement</td><td>交战规则</td></tr>
+              <tr><td class="mono">LAWS</td><td>Lethal Autonomous Weapons Systems</td><td>致命性自主武器系统</td></tr>
+              <tr><td class="mono">SoI / SoS</td><td>System of Interest / System of Systems</td><td>目标系统 / 体系</td></tr>
+              <tr><td class="mono">BIT</td><td>Built-In Test</td><td>机内自检</td></tr>
+              <tr><td class="mono">BMS</td><td>Battery Management System</td><td>电池管理系统</td></tr>
+              <tr><td class="mono">SLAM</td><td>Simultaneous Localization and Mapping</td><td>同步定位与建图</td></tr>
+              <tr><td class="mono">OTA</td><td>Over-the-Air</td><td>远程在线升级</td></tr>
+              <tr><td class="mono">LRU</td><td>Line Replaceable Unit</td><td>外场可更换单元</td></tr>
+              <tr><td class="mono">CEP</td><td>Circular Error Probable</td><td>圆概率误差</td></tr>
+              <tr><td class="mono">HMI</td><td>Human-Machine Interface</td><td>人机交互界面</td></tr>
+              <tr><td class="mono">MAC</td><td>Medium Access Control</td><td>多址接入控制</td></tr>
+              <tr><td class="mono">GNSS</td><td>Global Navigation Satellite System</td><td>全球导航卫星系统</td></tr>
+              <tr><td class="mono">TPM</td><td>Trusted Platform Module</td><td>可信平台模块</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 E-1　缩略语</div>
+      </div>
+    </section>
+
+    <section class="chap" id="review" data-vol="all" data-group="trace" data-t="评审 · 检查单 · 基线">
+      <div class="chap-head">
+        <span class="chap-no">R</span>
+        <div>
+          <h2>需求评审、检查单与基线</h2>
+          <span class="chap-sub">REQUIREMENTS REVIEW · CHECKLISTS · DELIVERABLE BASELINE</span>
+        </div>
+      </div>
+
+      <p class="lead">
+        概念阶段的产出如果无人评审、无基线、无追溯，等于没有产出。本章给出评审流程、四方面准则与两份可直接使用的检查单，
+        供项目在试评审与正式评审中使用。
+      </p>
+
+      <h3 id="rv-1"><span class="n">R.1</span>评审流程六步</h3>
+      <div class="grid g3">
+        <div class="card"><div class="ct">① 制定并发布评审计划</div><div class="cd">确定评审人员（客户、需求拥有者、系统工程师、供应商、方案团队），确保覆盖全部相关方类型；即便不能出席，其观点也必须被处理。</div></div>
+        <div class="card"><div class="ct">② 出具相关文档</div><div class="cd">评审前至少两周完成基线并分发；提供检查单与评审指南，聚焦关键领域而非通读全文。</div></div>
+        <div class="card"><div class="ct">③ 接收并分析变更请求</div><div class="cd">鼓励会前提交变更请求（RID），便于分组、理解意图、评估影响。</div></div>
+        <div class="card"><div class="ct">④ 执行评审</div><div class="cd">会议目的是<b>做决策</b>而非通读文档：逐条接受/拒绝变更请求，记录行动项与决策依据。</div></div>
+        <div class="card"><div class="ct">⑤ 实现批准的变更</div><div class="cd">会议后更新规格与文档，把批准变更并入基线。</div></div>
+        <div class="card"><div class="ct">⑥ 结束评审</div><div class="cd">所有接受变更并入更新基线；备忘录显示每个请求状态与建议；后续变更走正式变更控制。</div></div>
+      </div>
+
+      <h3 id="rv-2"><span class="n">R.2</span>四方面评审准则</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:150px">方面</th><th style="width:300px">达标准则</th><th>本项目对照</th></tr></thead>
+            <tbody>
+              <tr><td class="name">交付物完整性</td><td>BRS、BtRS/StRS、OCD、RVTM、验证准则（MOE/MOS）、系统功能清单、相关方需要、过程记录齐备。</td><td>本文件 + 上卷层级解构共同构成概念阶段基线。</td></tr>
+              <tr><td class="name">对需要/上级需求的满足</td><td>所有相关方需要都有对应需求；上级业务需求在本层都有对应条目。</td><td>见附录 A（需要 20 条）→ 附录 B（需求 20 条）一一对应；BRS 业务目的 → TR → SR 全链可追。</td></tr>
+              <tr><td class="name">条目与需求集质量</td><td>按《需求规格说明书检查单》与《相关方需求规格说明书检查单》审查无不符合项。</td><td>见 R.3 检查单。</td></tr>
+              <tr><td class="name">满足的质量</td><td>是否集成考虑法规、环境、交互系统、使能系统、参与者与威胁；是否覆盖全部可能情况与故障应对；是否是最佳表达。</td><td>6.2 场景覆盖正常/退化/异常；附录 D 覆盖故障与合规情景。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 R-1　四方面评审准则</div>
+      </div>
+
+      <h3 id="rv-3"><span class="n">R.3</span>检查单</h3>
+
+      <h4><span class="n">R.3.1</span>需求规格说明书检查单（通用）</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:50px">序</th><th style="width:110px">特性</th><th>检查内容</th><th style="width:70px">结论</th></tr></thead>
+            <tbody>
+              <tr><td class="c">1</td><td class="name">完整</td><td>含交付范围内的上下文、约束与全部要求：系统背景（原理、商业案例、相关方）、约束（时间/资金/资源/设计）、功能需求、质量需求。</td><td class="c"><span class="chip c-direct">符合</span></td></tr>
+              <tr><td class="c">2</td><td class="name">一致</td><td>与交付范围一致；条目之间无冲突。</td><td class="c"><span class="chip c-direct">符合</span></td></tr>
+              <tr><td class="c">3</td><td class="name">结构化</td><td>单条需求与整体需求集的连贯性与依赖性清晰。</td><td class="c"><span class="chip c-direct">符合</span></td></tr>
+              <tr><td class="c">4</td><td class="name">可追溯</td><td>唯一确定，并明确关联到 SOW / 上游需求。</td><td class="c"><span class="chip c-direct">符合</span></td></tr>
+              <tr><td class="c">5</td><td class="name">可行</td><td>在资源约束内至少存在一个可执行的设计与实现。</td><td class="c"><span class="chip c-cons">需评审确认</span></td></tr>
+              <tr><td class="c">6</td><td class="name">简洁</td><td>包含必要信息，并尽可能简单表达。</td><td class="c"><span class="chip c-direct">符合</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 R-2　需求规格说明书检查单</div>
+      </div>
+
+      <h4><span class="n">R.3.2</span>相关方需求规格说明书检查单</h4>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr><th style="width:50px">序</th><th style="width:170px">检查问题</th><th>说明与本项目做法</th></tr></thead>
+            <tbody>
+              <tr><td class="c">1</td><td>符合相关方的语言吗</td><td>附录 A 保留原始表述（含「不要伤害我」这类口语），附录 B 再转为规范表述。</td></tr>
+              <tr><td class="c">2</td><td>有优先级吗</td><td>SR 采用「必须 / 应该 / 可选」三级；TR 另设最高/高/中高/中。</td></tr>
+              <tr><td class="c">3</td><td>有理由吗</td><td>每条 SR 标注来源需要编号（N-xx）与相关方。</td></tr>
+              <tr><td class="c">4</td><td>需求正确吗</td><td>对「更快的马」类表述已追问目的：例如「充电快」→ 换电 ≤ 3 min。</td></tr>
+              <tr><td class="c">5</td><td>完整吗</td><td>每条为完整陈述句，含主体、条件、判据。</td></tr>
+              <tr><td class="c">6</td><td>清晰吗</td><td>阈值全部量化（时间、距离、概率、分贝）。</td></tr>
+              <tr><td class="c">7</td><td>一致吗</td><td>术语统一（见附录 E）；SR 与 SR-R 规则无矛盾。</td></tr>
+              <tr><td class="c">8</td><td>可验证吗</td><td>每条标注 I/A/D/T 验证方法与通过判据。</td></tr>
+              <tr><td class="c">9</td><td>可追溯吗</td><td>附录 C、D 提供 TR↔SR、BO→TR→SR→系统的双向追溯。</td></tr>
+              <tr><td class="c">10</td><td>可行吗</td><td>指标基于现有技术成熟度，未设置超出当前工程能力的跳跃目标。</td></tr>
+              <tr><td class="c">11</td><td>独立于设计吗</td><td>除法规强制项（物理断开、自毁）外，不指定实现方式。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-cap">表 R-3　相关方需求规格说明书检查单</div>
+      </div>
+
+      <h3 id="rv-4"><span class="n">R.4</span>基线制品清单</h3>
+      <div class="grid g4">
+        <div class="card"><div class="ct">1</div><div class="cd">业务需求规格说明 <b>BRS</b></div></div>
+        <div class="card"><div class="ct">2</div><div class="cd">相关方需求规格说明 <b>BtRS / StRS</b></div></div>
+        <div class="card"><div class="ct">3</div><div class="cd">运行概念文档 <b>OCD</b></div></div>
+        <div class="card"><div class="ct">4</div><div class="cd">需求验证与追溯矩阵 <b>RVTM</b></div></div>
+        <div class="card"><div class="ct">5</div><div class="cd">验证准则（<b>MOE / MOS</b>）</div></div>
+        <div class="card"><div class="ct">6</div><div class="cd">被识别的系统功能清单</div></div>
+        <div class="card"><div class="ct">7</div><div class="cd">相关方需要（备查）</div></div>
+        <div class="card"><div class="ct">8</div><div class="cd">相关方需要与需求定义过程记录</div></div>
+      </div>
+
+      <div class="note good">
+        <span class="k">SELF-CHECK / 本文件自检结论</span>
+        ① 相关方 20 类，覆盖直接/交互/约束/被影响四类，无遗漏高风险相关方；
+        ② 需要 20 条全部有对应需求条目，无「有需要无需求」；
+        ③ 任务需求 12 条全部可追溯到业务目的，并落到系统/子系统；
+        ④ 运行概念覆盖四个状态与四条降级路径，场景覆盖正常/退化/异常；
+        ⑤ MOE/MOS 均有可判定的通过/失败判据。<br />
+        待补事项：附录 A 的「需澄清点」需在需求确认会上逐条与相关方核对；MOS 具体数值需在方案设计阶段按实际技术状态收敛。
+      </div>
+    </section>
+
+    <footer>
+      <span>WHEEL-LEGGED UCP · BRS &amp; BtRS (StRS) · CONCEPT DEFINITION</span>
+      <span>问题域 · 业务或使命分析 → 相关方需要与需求定义 → 系统需求定义（下游）</span>
+    </footer>
+
+  </main>
+</div>
+
+<button id="toTop" title="回到顶部">↑</button>
+
+<script>
+/* ================= 卷切换 ================= */
+const body = document.body;
+const volBtns = document.querySelectorAll('#volswitch button');
+volBtns.forEach(b => b.addEventListener('click', () => {
+  volBtns.forEach(x => x.classList.toggle('on', x === b));
+  const v = b.dataset.vol;
+  body.classList.remove('vol-all','vol-brs','vol-strs');
+  body.classList.add('vol-' + v);
+  buildTOC();
+}));
+
+/* ================= 目录自动生成（分组与章节均可收起） ================= */
+const tocState = {groups: new Set(), subs: new Set()};
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  const cur = body.classList.contains('vol-brs') ? 'brs' : body.classList.contains('vol-strs') ? 'strs' : 'all';
+  const secs = [...document.querySelectorAll('main section.chap')].filter(s => {
+    const v = s.dataset.vol || 'all';
+    if (cur === 'all') return true;
+    return v === 'all' || v === cur;
+  });
+  const groups = [
+    {key:'brs', title:'BRS · 业务需求', cls:'b'},
+    {key:'strs', title:'BtRS · 相关方需求', cls:'s'},
+    {key:'trace', title:'追溯 · 验证 · 评审', cls:''}
+  ];
+  let html = '';
+  groups.forEach(g => {
+    const list = secs.filter(s => (s.dataset.group || s.dataset.vol) === g.key);
+    if (!list.length) return;
+    const gc = tocState.groups.has(g.key) ? ' collapsed' : '';
+    html += '<div class="toc-sec' + gc + '" data-g="' + g.key + '">';
+    html += '<button class="toc-h ' + g.cls + '" data-gtoggle type="button" title="收起/展开该卷">'
+          + '<span>' + g.title + '</span><span class="arw"></span></button>';
+    html += '<div class="toc-list">';
+    list.forEach(s => {
+      const t = s.dataset.t || s.querySelector('h2').textContent.trim();
+      const subs = [...s.querySelectorAll('h3[id]')];
+      const sc = tocState.subs.has(s.id) ? ' closed' : '';
+      html += '<div class="toc-chap">';
+      html += '<a href="#' + s.id + '" data-id="' + s.id + '">' + t + '</a>';
+      if (subs.length) {
+        html += '<button class="arw' + sc + '" data-ctoggle="' + s.id + '" type="button" title="收起/展开小节"></button>';
+      }
+      html += '</div>';
+      if (subs.length) {
+        html += '<div class="toc-sub' + sc + '" data-sub="' + s.id + '">';
+        subs.forEach(h => {
+          html += '<a class="lv3" href="#' + h.id + '" data-id="' + h.id + '">' + h.textContent.replace(/\s+/g,' ').trim() + '</a>';
+        });
+        html += '</div>';
+      }
+    });
+    html += '</div></div>';
+  });
+  toc.innerHTML = html;
+  bindScrollSpy();
+}
+
+/* 目录折叠交互（事件委托，重建目录后依然有效） */
+document.getElementById('toc').addEventListener('click', e => {
+  const gb = e.target.closest('[data-gtoggle]');
+  if (gb) {
+    const sec = gb.closest('.toc-sec');
+    const collapsed = sec.classList.toggle('collapsed');
+    if (collapsed) tocState.groups.add(sec.dataset.g); else tocState.groups.delete(sec.dataset.g);
+    return;
+  }
+  const cb = e.target.closest('[data-ctoggle]');
+  if (cb) {
+    const id = cb.dataset.ctoggle;
+    const sub = document.querySelector('#toc .toc-sub[data-sub="' + id + '"]');
+    if (!sub) return;
+    const closed = sub.classList.toggle('closed');
+    cb.classList.toggle('closed', closed);
+    if (closed) tocState.subs.add(id); else tocState.subs.delete(id);
+  }
+});
+
+let spyObs = null;
+function bindScrollSpy(){
+  if (spyObs) spyObs.disconnect();
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.dataset.id, a]));
+  const targets = links.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+  spyObs = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      links.forEach(a => a.classList.remove('on'));
+      const a = map.get(en.target.id);
+      if (a) {
+        a.classList.add('on');
+        /* 折叠状态完全由用户掌控：滚动高亮不再自动展开目录 */
+        if (a.offsetParent !== null) a.scrollIntoView({block:'nearest'});
+      }
+    });
+  }, {rootMargin:'-70px 0px -72% 0px', threshold:0});
+  targets.forEach(t => spyObs.observe(t));
+}
+
+/* ================= 相关方矩阵数据与渲染 ================= */
+const STAKEHOLDERS = [
+  {id:1, cat:'直接', name:'一线作战班组', elem:'活动、数据', g1:'提出需求，制定战术', g2:'人力掩护与操作', g3:'开火授权、紧急接管', g4:'人机交互逻辑', att:'+2', infl:'强', imp:'高'},
+  {id:2, cat:'直接', name:'敌方电子战/火力单元', elem:'信号、能量、物质', g1:'实施反无人战术', g2:'发射弹药、消耗干扰', g3:'物理摧毁、电磁阻断', g4:'平台抗干扰/隐身力', att:'-2', infl:'强', imp:'高'},
+  {id:3, cat:'直接', name:'同编队友军无人集群', elem:'信号、数据', g1:'协同战术规则', g2:'共享算力与视距', g3:'路权优先权、任务协调', g4:'避免误伤/防碰撞', att:'+1', infl:'中', imp:'高'},
+  {id:4, cat:'直接', name:'有人战车/突击车乘员', elem:'活动、信号', g1:'人机混编战术', g2:'提供伴随掩护', g3:'指挥权、目标移交权', g4:'机动速度匹配、协同接口', att:'+2', infl:'中', imp:'高'},
+  {id:5, cat:'交互', name:'体系指挥控制网络', elem:'数据、信号', g1:'数据链协议管理', g2:'全域态势与指令', g3:'节点接入许可', g4:'网络带宽与拓扑', att:'+2', infl:'强', imp:'高'},
+  {id:6, cat:'交互', name:'算法与 AI 模型提供方', elem:'数据', g1:'算法架构与版本管理', g2:'算力与训练数据', g3:'算法 OTA 写入权', g4:'算力平台限制', att:'+1', infl:'中', imp:'高'},
+  {id:7, cat:'交互', name:'前沿充电桩/换电站', elem:'能量、物质', g1:'制定充电安全规程', g2:'提供电能与备用电池', g3:'拒绝供电权', g4:'接口物理标准', att:'0', infl:'弱', imp:'中'},
+  {id:8, cat:'交互', name:'卫星通信/数据链运营商', elem:'信号', g1:'频谱与链路运营管理', g2:'提供物理通信信道', g3:'信道切断权', g4:'带宽限制、时延', att:'+1', infl:'中', imp:'中'},
+  {id:9, cat:'交互', name:'高精地图与地理情报机构', elem:'数据', g1:'地图数据分发管理', g2:'提供先验 SLAM 地图', g3:'地图数据更新权', g4:'坐标精度要求', att:'+1', infl:'弱', imp:'高'},
+  {id:10, cat:'交互', name:'武器载荷/弹药供应商', elem:'物质', g1:'弹药批次管理', g2:'提供武器站与弹药', g3:'供货优先级', g4:'武器站物理接口', att:'+1', infl:'中', imp:'中'},
+  {id:11, cat:'交互', name:'前线运输投送部队', elem:'物质、活动', g1:'运输调度管理', g2:'提供车辆运输平台', g3:'投送路线决定权', g4:'平台重量与尺寸限制', att:'0', infl:'弱', imp:'中'},
+  {id:12, cat:'交互', name:'装备维修与抢修分队', elem:'物质、活动', g1:'维修规程与备件管理', g2:'提供维修工具与备件', g3:'判定装备是否可修复', g4:'模块化快拆设计要求', att:'+1', infl:'中', imp:'高'},
+  {id:13, cat:'约束', name:'装备采办与试验鉴定局', elem:'物质、活动', g1:'定型审查与验收', g2:'研发经费与靶场', g3:'项目否决权', g4:'研制周期与指标', att:'+1', infl:'强', imp:'中'},
+  {id:14, cat:'约束', name:'频谱管理与法规机构', elem:'信号', g1:'频率分配与用频许可', g2:'无', g3:'用频吊销权', g4:'电磁兼容与用频标准', att:'0', infl:'中', imp:'中'},
+  {id:15, cat:'约束', name:'网络安全与保密部门', elem:'数据、信号', g1:'密码与数据安全管理', g2:'加密算法与密钥', g3:'安全一票否决权', g4:'数据防篡改、抗黑客', att:'+1', infl:'强', imp:'高'},
+  {id:16, cat:'约束', name:'国际战争伦理委员会', elem:'活动', g1:'自主武器伦理审查', g2:'无', g3:'舆论与道德制裁', g4:'致命性自主武器(LAWS)限制', att:'-1', infl:'中', imp:'高'},
+  {id:17, cat:'被影响', name:'平民/非战斗人员', elem:'物质、活动', g1:'受国际人道法保护', g2:'无', g3:'生命权与免于误伤权', g4:'严苛的交战规则(ROE)', att:'0', infl:'强', imp:'极高'},
+  {id:18, cat:'被影响', name:'敌方战俘/伤员', elem:'活动、物质', g1:'受《日内瓦公约》保护', g2:'无', g3:'获得人道待遇权', g4:'需 AI 具备「识别投降」能力', att:'0', infl:'弱', imp:'中'},
+  {id:19, cat:'被影响', name:'自然环境与生态', elem:'物质、能量', g1:'环保法规约束', g2:'提供地形与气候背景', g3:'物理否决权（极端气候）', g4:'电池回收、防污染标准', att:'0', infl:'中', imp:'高'},
+  {id:20, cat:'被影响', name:'新闻媒体与公众舆论', elem:'数据、信号', g1:'报道权与知情权', g2:'传播渠道', g3:'舆论监督权（可反噬项目）', g4:'误伤平民造成的舆论压力', att:'0', infl:'中', imp:'中'}
+];
+const SH_CHIP = {'直接':'c-direct','交互':'c-inter','约束':'c-cons','被影响':'c-aff'};
+const SH_ATT = {'+2':'c-direct','+1':'c-inter','0':'chip-plain','-1':'c-cons','-2':'c-red'};
+
+function renderSH(){
+  const bodyEl = document.getElementById('shBody');
+  if (!bodyEl) return;
+  const onBtn = document.querySelector('#shFilter .fbtn.on');
+  const f = onBtn ? onBtn.dataset.f : 'all';
+  const q = (document.getElementById('shSearch').value || '').trim();
+  const rows = STAKEHOLDERS.filter(s => (f === 'all' || s.cat === f) &&
+    (!q || (s.name + s.elem + s.g1 + s.g2 + s.g3 + s.g4).indexOf(q) !== -1));
+  bodyEl.innerHTML = rows.map(s => `
+    <tr>
+      <td class="id">${String(s.id).padStart(2,'0')}</td>
+      <td><span class="chip ${SH_CHIP[s.cat]}">${s.cat}</span></td>
+      <td class="name">${s.name}</td>
+      <td class="small dim">${s.elem}</td>
+      <td class="small">${s.g1}</td>
+      <td class="small">${s.g2}</td>
+      <td class="small">${s.g3}</td>
+      <td class="small">${s.g4}</td>
+      <td class="c"><span class="chip ${SH_ATT[s.att]}">${s.att}</span></td>
+      <td class="c small">${s.infl}</td>
+      <td class="c small">${s.imp}</td>
+    </tr>`).join('');
+  document.getElementById('shCount').textContent = rows.length + ' / ' + STAKEHOLDERS.length + ' 类';
+}
+
+(function initSH(){
+  const bar = document.getElementById('shFilter');
+  if (!bar) return;
+  bar.addEventListener('click', e => {
+    const b = e.target.closest('.fbtn');
+    if (!b) return;
+    bar.querySelectorAll('.fbtn').forEach(x => x.classList.toggle('on', x === b));
+    renderSH();
+  });
+  document.getElementById('shSearch').addEventListener('input', renderSH);
+  renderSH();
+})();
+
+/* ================= 打印 ================= */
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+/* 打印时自动展开所有折叠的需求条目，打印后恢复 */
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('details.trd:not([open])').forEach(d => {
+    d.dataset.wasClosed = '1';
+    d.open = true;
+  });
+});
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('details.trd[data-was-closed="1"]').forEach(d => {
+    d.open = false;
+    delete d.dataset.wasClosed;
+  });
+});
+
+/* ================= 回到顶部 ================= */
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  toTop.classList.toggle('show', window.scrollY > 600);
+}, {passive:true});
+toTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+buildTOC();
+</script>
+</body>
+</html>
