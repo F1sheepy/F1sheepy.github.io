@@ -1,3 +1,5 @@
 # 渲染 / 截图 / 一次性诊断产物（automation-edge 技能约定）
 # 这些文件只用于“看一眼”，不属于交付物，不进版本库
 _diag/
+tools
+odd-web
